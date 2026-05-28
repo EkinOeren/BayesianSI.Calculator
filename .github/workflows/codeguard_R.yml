@@ -1,0 +1,27 @@
+name: CodeGuard R scan
+
+on:
+   workflow_dispatch:
+   pull_request:
+     branches:
+       - main
+       - master
+
+jobs:
+
+  R_scan:
+    runs-on: [atmos-aws-arc-runner-set]
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: run the CodeGuard R scan
+        run: |
+            docker run --rm -v"${PWD}:/src"  docker-atmos-remote.artifactory.sanofi.com/cybersecurity/codeguard_r_scanner:0.2 --gitleaks --export markdown --out R_scan_output.md
+            cat R_scan_output.md >> $GITHUB_STEP_SUMMARY
+      - name: Upload CodeGuard R scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodeGuard R scan results
+          path: R_scan_output.md

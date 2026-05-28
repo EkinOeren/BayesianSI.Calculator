@@ -1,0 +1,24 @@
+Package: BayesianStatisticalIntervalsCalculator
+Title: BSI is a Bayesian Statistical Analysis Tool
+Version: 2.0.0
+Authors@R: 
+    person("Ekin", "Ören", , "Ekin.Oren@Sanofi.com", role = c("aut", "cre"))
+Description: BSI is a Bayesian statistical analysis tool that calculates and visualizes statistical intervals and posterior predictive distributions from uploaded MCMC output data. Users select fixed effects and variance components, defining a Linear Mixed Model in order to generate credible, prediction, and tolerance intervals with adjustable confidence levels.
+License: License: Apache License (>= 2.0)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Imports:
+    shiny,
+    DT,
+    bslib,
+    dplyr,
+    readr,
+    data.table,
+    utf8,
+    ggplot2,
+    grid,
+    plotly,
+    stats
+Depends: 
+    R (>= 4.1.0)
