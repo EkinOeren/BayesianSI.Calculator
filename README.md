@@ -521,12 +521,12 @@ This package is licensed under the [MIT License](LICENSE.md). Copyright © 2025 
 ## Contact
 
 For bug reports, feature requests, and other questions:
-- GitHub Issues: https://github.com/Sanofi-GitHub/BSI-APP/issues
+- GitHub Issues: https://github.com/Sanofi-Public/BayesianSI.Calculator/issues
 - Maintainer: Ekin Ören (Ekin.Oeren@sanofi.com)
 
 ---
 
 **Additional Resources:**
 
-- [Internal_BSI Shiny App](https://r-connect-dev.prod.p488440267176.aws-emea.sanofi.com/content/b1cdbb08-12fe-4136-a108-6456cb19c957/).
+- [Internal_BSI Shiny App](https://r-connect-dev.prod.p488440267176.aws-emea.sanofi.com/content/b1cdbb08-12fe-4136-a108-6456cb19c957/)
 - [Technical Documentation](https://r-connect-dev.prod.p488440267176.aws-emea.sanofi.com/content/44966b86-ac33-4d42-9db9-4e4f69a03835/Notebook3_DocumentationBSIApp_Version_0.2.html)
