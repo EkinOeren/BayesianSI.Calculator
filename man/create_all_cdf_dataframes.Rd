@@ -27,10 +27,19 @@ A list of dataframes, each containing CDF data for a specific by-value
 This function creates CDF data for all by-values in the predicted distributions output.
 }
 \examples{
-\dontrun{
-pred_dist <- calculate_predicted_distributions(data, "fixed1", "random1",
-                                             "Group", 95)
+set.seed(1)
+mcmc <- data.frame(
+  Group = rep(c("A", "B"), each = 50),
+  beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+  sigma2 = rgamma(100, shape = 20, rate = 10),
+  age = rnorm(100, 50, 5)
+)
+
+pred_dist <- calculate_predicted_distributions(
+  mcmc, fixed_effects = "beta", random_params = "sigma2",
+  by = "Group", tolerance_level = 90
+)
 all_cdf_data <- create_all_cdf_dataframes(pred_dist)
-}
+names(all_cdf_data)
 
 }

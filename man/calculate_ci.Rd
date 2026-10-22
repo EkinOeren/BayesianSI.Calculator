@@ -28,12 +28,11 @@ This function calculates credibility intervals for a specified column,
 grouped by another column.
 }
 \examples{
-\dontrun{
+set.seed(1)
 data <- data.frame(
   Group = rep(c("A", "B"), each = 50),
   Value = c(rnorm(50, 10, 2), rnorm(50, 15, 3))
 )
 calculate_ci(data, "Value", 95, "Group")
-}
 
 }

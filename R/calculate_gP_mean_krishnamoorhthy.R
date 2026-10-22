@@ -14,15 +14,12 @@
 #' @return A named vector of gP_mean values, with names corresponding to By values
 #'
 #' @examples
-#' \dontrun{
 #' data <- data.frame(
 #'   By = c("A", "A", "B", "B"),
 #'   lower_quantile = c(-2, -1, -3, -2),
 #'   upper_quantile = c(2, 3, 1, 2)
 #' )
-#' gP_mean <- calculate_gP_mean(data, 90)
-#' # Returns: c(A = 0.5, B = -0.5)
-#' }
+#' calculate_gP_mean(data, 90)
 #'
 #' @export
 calculate_gP_mean <- function(scatter_data, P) {
@@ -36,8 +33,8 @@ calculate_gP_mean <- function(scatter_data, P) {
   }
 
   # Calculate gP_mean for each By value
-  gP_mean <- scatter_data %>%
-    dplyr::group_by(By) %>%
+  gP_mean <- scatter_data |>
+    dplyr::group_by(By) |>
     dplyr::summarise(
       M = dplyr::n(), # number of samples
       gP_mean = (1/M) * sum((lower_quantile + upper_quantile)/2),

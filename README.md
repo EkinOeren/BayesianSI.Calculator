@@ -524,10 +524,3 @@ This package is licensed under the [Apache License, Version 2.0](LICENSE.md). Co
 For bug reports, feature requests, and other questions:
 - GitHub Issues: https://github.com/Sanofi-Public/BayesianSI.Calculator/issues
 - Maintainer: Ekin Ören (ekin.oren.3@gmail.com)
-
----
-
-**Coming Soon:**
-
-- [Internal_BSI Shiny App]
-- [Technical Documentation]

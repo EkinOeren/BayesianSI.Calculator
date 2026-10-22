@@ -17,7 +17,7 @@ plot_posterior_predictive(
 \arguments{
 \item{cdf_data}{A dataframe from create_cdf_dataframe() containing CDF information, or a list of such dataframes}
 
-\item{x_value}{Optional. Single numeric value or range \link{min,max} as character string (e.g., "\link{2,5}")}
+\item{x_value}{Optional. Single numeric value or range [min,max] as character string (e.g., "[2,5]")}
 
 \item{title}{Optional. Custom plot title. If NULL, auto-generates based on by-value}
 
@@ -35,21 +35,22 @@ Creates an interactive plot of the posterior predictive distribution using plotl
 Its only a legacy function to keep compatibility with the older versions.
 }
 \examples{
-\dontrun{
-# Basic plot with list input (automatically uses "Single Chain")
-pred_dist <- calculate_predicted_distributions(data, "fixed1", "random1",
-                                             "Group", 95)
-cdf_data <- create_cdf_dataframe(pred_dist)
-plot_posterior_predictive(cdf_data)
+set.seed(1)
+mcmc <- data.frame(
+  Group = rep(c("A", "B"), each = 50),
+  beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+  sigma2 = rgamma(100, shape = 20, rate = 10),
+  age = rnorm(100, 50, 5)
+)
 
-# Plot with specific by-value from list
-plot_posterior_predictive(cdf_data[["A"]])
-
-# Plot with x-value
-plot_posterior_predictive(cdf_data, x_value = "5")
-
-# Plot with range
-plot_posterior_predictive(cdf_data, x_value = "[2,5]")
-}
+pred_dist <- calculate_predicted_distributions(
+  mcmc, fixed_effects = "beta", random_params = "sigma2",
+  by = "Group", tolerance_level = 90
+)
+cdf_data <- create_cdf_dataframe(pred_dist, by_value = "A")
+p <- plot_posterior_predictive(cdf_data)
+# Mark a single x-value, or a range
+p_x <- plot_posterior_predictive(cdf_data, x_value = "10")
+p_range <- plot_posterior_predictive(cdf_data, x_value = "[9, 11]")
 
 }

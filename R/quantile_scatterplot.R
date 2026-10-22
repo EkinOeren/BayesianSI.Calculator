@@ -32,46 +32,27 @@
 #' - Interactive tooltips provide detailed information
 #'
 #' @examples
-#' \dontrun{
-#' # Example 1: From raw data without covariates
-#' plot1 <- quantile_scatterplot(
-#'   data = mcmc_samples,
-#'   fixed_effects = "beta0",
-#'   random_params = "sigma2",
-#'   by = "Group",
-#'   tolerance_level = 95,
-#'   ellipse_confidence = 90
+#' set.seed(1)
+#' mcmc <- data.frame(
+#'   Group = rep(c("A", "B"), each = 50),
+#'   beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+#'   sigma2 = rgamma(100, shape = 20, rate = 10),
+#'   age = rnorm(100, 50, 5)
 #' )
 #'
-#' # Example 2: From raw data with covariates
-#' plot2 <- quantile_scatterplot(
-#'   data = mcmc_samples,
-#'   fixed_effects = "beta0",
-#'   random_params = "sigma2",
-#'   by = "Group",
-#'   covariate_cols = "age",
-#'   covariate_values = 65,
-#'   tolerance_level = 90
+#' # From raw MCMC draws
+#' p1 <- quantile_scatterplot(
+#'   data = mcmc, fixed_effects = "beta", random_params = "sigma2",
+#'   by = "Group", tolerance_level = 95, ellipse_confidence = 90
 #' )
 #'
-#' # Example 3: From pre-calculated distributions
-#' pred_dist <- calculate_predicted_distributions(...)
-#' plot3 <- quantile_scatterplot(
-#'   pred_dist = pred_dist,
-#'   tolerance_level = 95,
-#'   ellipse_confidence = 95
+#' # From pre-calculated distributions, with a covariate
+#' pred_dist <- calculate_predicted_distributions(
+#'   mcmc, "beta", "sigma2", "Group", tolerance_level = 95,
+#'   covariate_cols = "age", covariate_values = 0.1
 #' )
-#'
-#' # Example 4: Filter specific groups
-#' plot4 <- quantile_scatterplot(
-#'   data = mcmc_samples,
-#'   fixed_effects = "beta0",
-#'   random_params = "sigma2",
-#'   by = "Group",
-#'   selected_by_values = c("A", "B"),
-#'   tolerance_level = 90
-#' )
-#' }
+#' p2 <- quantile_scatterplot(pred_dist = pred_dist, tolerance_level = 95,
+#'                            ellipse_confidence = 95)
 #'
 #' @import ggplot2
 #' @importFrom stats cov

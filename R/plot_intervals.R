@@ -14,22 +14,20 @@
 #' @return A plotly object displaying the statistical intervals
 #'
 #' @examples
-#' \dontrun{
-#' data <- data.frame(
-#'   t1 = c(-0.82, -0.75, -0.79),
-#'   v1 = c(0.91, 0.88, 0.90),
-#'   By = c(1, 1, 2)
+#' set.seed(1)
+#' mcmc <- data.frame(
+#'   Group = rep(c("A", "B"), each = 50),
+#'   beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+#'   sigma2 = rgamma(100, shape = 20, rate = 10),
+#'   age = rnorm(100, 50, 5)
 #' )
-#' calc_result <- perform_calculations(
-#'   data = data,
-#'   fixed_effects = "t1",
-#'   random_params = "v1",
-#'   by = "By",
-#'   tolerance_level = 90
+#'
+#' res <- perform_calculations(
+#'   mcmc, fixed_effects = "beta", random_params = "sigma2",
+#'   by = "Group", tolerance_level = 90
 #' )
-#' plot_intervals(calc_result)
-#' plot_intervals(calc_result, show_summary = TRUE)
-#' }
+#' p <- plot_intervals(res)
+#' p2 <- plot_intervals(res, show_summary = TRUE)
 #'
 #' @export
 plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
@@ -161,20 +159,20 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
                       hoverinfo = "text",
                       text = sprintf("CI<br>By: %s<br>Lower: %.4f<br>Upper: %.4f<br>Median: %.4f",
                                      by_label, data$CI_Lower[i], data$CI_Upper[i], data$Median[i])
-    ) %>%
+    ) |>
       # Add CI caps
       add_segments(
         x = by_val - offset_scale - cap_width, y = data$CI_Lower[i],
         xend = by_val - offset_scale + cap_width, yend = data$CI_Lower[i],
         line = list(color = '#de2f2f', width = 1.5),
         showlegend = FALSE
-      ) %>%
+      ) |>
       add_segments(
         x = by_val - offset_scale - cap_width, y = data$CI_Upper[i],
         xend = by_val - offset_scale + cap_width, yend = data$CI_Upper[i],
         line = list(color = '#de2f2f', width = 1.5),
         showlegend = FALSE
-      ) %>%
+      ) |>
       # Add CI median point
       add_markers(
         x = by_val - offset_scale, y = data$Median[i],
@@ -192,20 +190,20 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
                       hoverinfo = "text",
                       text = sprintf("PI<br>By: %s<br>Lower: %.4f<br>Upper: %.4f<br>Median: %.4f",
                                      by_label, data$PI_Lower[i], data$PI_Upper[i], data$Median[i])
-    ) %>%
+    ) |>
       # Add PI caps
       add_segments(
         x = by_val - cap_width, y = data$PI_Lower[i],
         xend = by_val + cap_width, yend = data$PI_Lower[i],
         line = list(color = '#006400', width = 1.5),
         showlegend = FALSE
-      ) %>%
+      ) |>
       add_segments(
         x = by_val - cap_width, y = data$PI_Upper[i],
         xend = by_val + cap_width, yend = data$PI_Upper[i],
         line = list(color = '#006400', width = 1.5),
         showlegend = FALSE
-      ) %>%
+      ) |>
       # Add PI median point
       add_markers(
         x = by_val, y = data$Median[i],
@@ -223,20 +221,20 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
                       hoverinfo = "text",
                       text = sprintf("TI<br>By: %s<br>Lower: %.4f<br>Upper: %.4f<br>Median: %.4f",
                                      by_label, data$TI_Lower[i], data$TI_Upper[i], data$Median[i])
-    ) %>%
+    ) |>
       # Add TI caps
       add_segments(
         x = by_val + offset_scale - cap_width, y = data$TI_Lower[i],
         xend = by_val + offset_scale + cap_width, yend = data$TI_Lower[i],
         line = list(color = '#4232e7', width = 1.5),
         showlegend = FALSE
-      ) %>%
+      ) |>
       add_segments(
         x = by_val + offset_scale - cap_width, y = data$TI_Upper[i],
         xend = by_val + offset_scale + cap_width, yend = data$TI_Upper[i],
         line = list(color = '#4232e7', width = 1.5),
         showlegend = FALSE
-      ) %>%
+      ) |>
       # Add TI median point
       add_markers(
         x = by_val + offset_scale, y = data$Median[i],

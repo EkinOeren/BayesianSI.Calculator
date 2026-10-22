@@ -8,7 +8,7 @@
 #' @param random_params Character vector of column names for random parameters. Required if data is provided.
 #' @param by Character, name of the column to group by. Required if data is provided. Default is "Single Chain Dataset".
 #' @param by_value Character or numeric, the specific by-value to process. Default is "1".
-#' @param x_value Character or numeric, single value or range in format "[min,max]"
+#' @param x_value Character or numeric, single value or range in format "\[min,max\]"
 #' @param tolerance_level Numeric, tolerance level percentage (between 0 and 100). Required if data is provided.
 #' @param ci_percent Numeric, confidence interval percentage (default = 90)
 #' @param multiplication_factor Numeric, factor to multiply random parameters variance by (default = 1)
@@ -17,6 +17,20 @@
 #' @param pred_dist Optional. A dataframe containing predicted distributions. If provided, data parameters are ignored.
 #'
 #' @return A data frame formatted as a table for display
+#'
+#' @examples
+#' set.seed(1)
+#' mcmc <- data.frame(
+#'   Group = rep(c("A", "B"), each = 50),
+#'   beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+#'   sigma2 = rgamma(100, shape = 20, rate = 10),
+#'   age = rnorm(100, 50, 5)
+#' )
+#'
+#' get_probability_table(
+#'   data = mcmc, fixed_effects = "beta", random_params = "sigma2",
+#'   by = "Group", by_value = "A", x_value = "10", tolerance_level = 90
+#' )
 #'
 #' @export
 get_probability_table <- function(data = NULL, fixed_effects = NULL, random_params = NULL,
@@ -101,7 +115,7 @@ get_probability_table <- function(data = NULL, fixed_effects = NULL, random_para
     # Set proper column names with corrected capitalization and format
     colnames(table_data) <- c(
       "x value",
-      "Probability of X ≤ x",
+      "Probability of X \u2264 x",
       paste0(ci_percent, "% CI")
     )
 
@@ -132,7 +146,7 @@ get_probability_table <- function(data = NULL, fixed_effects = NULL, random_para
       # Set proper column names with corrected capitalization and format
       colnames(table_data) <- c(
         "x value",
-        "Probability of X ≤ x",
+        "Probability of X \u2264 x",
         paste0(ci_percent, "% CI")
       )
     } else {
@@ -146,7 +160,7 @@ get_probability_table <- function(data = NULL, fixed_effects = NULL, random_para
       # Set proper column names with corrected capitalization and format
       colnames(table_data) <- c(
         "x value",
-        "Probability of X ≤ x",
+        "Probability of X \u2264 x",
         paste0(ci_percent, "% CI")
       )
     }
@@ -167,7 +181,7 @@ get_probability_table <- function(data = NULL, fixed_effects = NULL, random_para
       y_min <- approx(x_values_log, y_mean, xout = xmin_log)$y
       y_max <- approx(x_values_log, y_mean, xout = xmax_log)$y
 
-      # Calculate range probability: P(xmin ≤ X ≤ xmax) = P(X ≤ xmax) - P(X ≤ xmin)
+      # Calculate range probability: P(xmin <= X <= xmax) = P(X <= xmax) - P(X <= xmin)
       range_prob <- y_max - y_min
 
       # Calculate the CDF value at xmin and xmax for each observation
@@ -200,8 +214,8 @@ get_probability_table <- function(data = NULL, fixed_effects = NULL, random_para
       # Set proper column names for range case
       colnames(table_data) <- c(
         "x Interval",
-        "P(xmin ≤ X ≤ xmax)",
-        paste0(ci_percent, "% CI for P(xmin ≤ X ≤ xmax)")
+        "P(xmin \u2264 X \u2264 xmax)",
+        paste0(ci_percent, "% CI for P(xmin \u2264 X \u2264 xmax)")
       )
     } else {
       # Create data frame with range information but out of range
@@ -214,8 +228,8 @@ get_probability_table <- function(data = NULL, fixed_effects = NULL, random_para
       # Set proper column names for range case
       colnames(table_data) <- c(
         "x Interval",
-        "P(xmin ≤ X ≤ xmax)",
-        paste0(ci_percent, "% CI for P(xmin ≤ X ≤ xmax)")
+        "P(xmin \u2264 X \u2264 xmax)",
+        paste0(ci_percent, "% CI for P(xmin \u2264 X \u2264 xmax)")
       )
     }
   }

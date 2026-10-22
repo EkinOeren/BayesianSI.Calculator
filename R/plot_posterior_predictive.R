@@ -4,7 +4,7 @@
 #' Its only a legacy function to keep compatibility with the older versions.
 #'
 #' @param cdf_data A dataframe from create_cdf_dataframe() containing CDF information, or a list of such dataframes
-#' @param x_value Optional. Single numeric value or range [min,max] as character string (e.g., "[2,5]")
+#' @param x_value Optional. Single numeric value or range \[min,max\] as character string (e.g., "\[2,5\]")
 #' @param title Optional. Custom plot title. If NULL, auto-generates based on by-value
 #' @param show_ci Logical. Whether to show confidence interval ribbon (default = TRUE)
 #' @param line_colors List of colors for different elements (optional)
@@ -13,22 +13,23 @@
 #' @return A plotly object containing the posterior predictive distribution plot
 #'
 #' @examples
-#' \dontrun{
-#' # Basic plot with list input (automatically uses "Single Chain")
-#' pred_dist <- calculate_predicted_distributions(data, "fixed1", "random1",
-#'                                              "Group", 95)
-#' cdf_data <- create_cdf_dataframe(pred_dist)
-#' plot_posterior_predictive(cdf_data)
+#' set.seed(1)
+#' mcmc <- data.frame(
+#'   Group = rep(c("A", "B"), each = 50),
+#'   beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+#'   sigma2 = rgamma(100, shape = 20, rate = 10),
+#'   age = rnorm(100, 50, 5)
+#' )
 #'
-#' # Plot with specific by-value from list
-#' plot_posterior_predictive(cdf_data[["A"]])
-#'
-#' # Plot with x-value
-#' plot_posterior_predictive(cdf_data, x_value = "5")
-#'
-#' # Plot with range
-#' plot_posterior_predictive(cdf_data, x_value = "[2,5]")
-#' }
+#' pred_dist <- calculate_predicted_distributions(
+#'   mcmc, fixed_effects = "beta", random_params = "sigma2",
+#'   by = "Group", tolerance_level = 90
+#' )
+#' cdf_data <- create_cdf_dataframe(pred_dist, by_value = "A")
+#' p <- plot_posterior_predictive(cdf_data)
+#' # Mark a single x-value, or a range
+#' p_x <- plot_posterior_predictive(cdf_data, x_value = "10")
+#' p_range <- plot_posterior_predictive(cdf_data, x_value = "[9, 11]")
 #'
 #' @importFrom plotly plot_ly add_trace add_ribbons layout add_segments
 #' @export
@@ -68,7 +69,7 @@ plot_posterior_predictive <- function(cdf_data, x_value = NULL, title = NULL,
   }
 
   # Create base plot
-  p <- plot_ly() %>%
+  p <- plot_ly() |>
     # Main CDF line
     add_trace(
       data = cdf_data,
@@ -80,14 +81,14 @@ plot_posterior_predictive <- function(cdf_data, x_value = NULL, title = NULL,
       line = list(color = line_colors$main, width = 2),
       hoverinfo = 'text',
       text = ~sprintf(
-        "x: %.4f<br>P(X ≤ x): %.4f",
+        "x: %.4f<br>P(X \u2264 x): %.4f",
         x, y_mean
       )
     )
 
   # Add confidence interval ribbon if requested
   if (show_ci) {
-    p <- p %>%
+    p <- p |>
       add_trace(
         data = cdf_data,
         x = ~x,
@@ -96,7 +97,7 @@ plot_posterior_predictive <- function(cdf_data, x_value = NULL, title = NULL,
         mode = 'lines',
         name = "CI Lower",
         line = list(color = line_colors$ci, width = 2)
-      ) %>%
+      ) |>
       add_trace(
         data = cdf_data,
         x = ~x,
@@ -105,7 +106,7 @@ plot_posterior_predictive <- function(cdf_data, x_value = NULL, title = NULL,
         mode = 'lines',
         name = "CI Upper",
         line = list(color = line_colors$ci, width = 2)
-      ) %>%
+      ) |>
       add_ribbons(
         data = cdf_data,
         x = ~x,
@@ -134,7 +135,7 @@ plot_posterior_predictive <- function(cdf_data, x_value = NULL, title = NULL,
 
         if (!is.na(y_val)) {
           # Add marker point
-          p <- p %>%
+          p <- p |>
             add_trace(
               x = x_val,
               y = y_val,
@@ -143,7 +144,7 @@ plot_posterior_predictive <- function(cdf_data, x_value = NULL, title = NULL,
               marker = list(color = line_colors$reference, size = 8),
               name = "Selected X Value",
               text = sprintf(
-                "x: %.4f<br>P(X ≤ x): %.4f<br>CI: [%.4f, %.4f]",
+                "x: %.4f<br>P(X \u2264 x): %.4f<br>CI: [%.4f, %.4f]",
                 x_val, y_val, ci_lower, ci_upper
               ),
               hoverinfo = 'text'
@@ -151,7 +152,7 @@ plot_posterior_predictive <- function(cdf_data, x_value = NULL, title = NULL,
 
           # Add reference lines if requested
           if (show_reference_lines) {
-            p <- p %>%
+            p <- p |>
               add_segments(
                 x = min(cdf_data$x),
                 xend = x_val,
@@ -160,7 +161,7 @@ plot_posterior_predictive <- function(cdf_data, x_value = NULL, title = NULL,
                 line = list(color = line_colors$reference,
                             width = 1, dash = 'dot'),
                 showlegend = FALSE
-              ) %>%
+              ) |>
               add_segments(
                 x = x_val,
                 xend = x_val,
@@ -183,7 +184,7 @@ plot_posterior_predictive <- function(cdf_data, x_value = NULL, title = NULL,
 
         if (!is.na(y_min) && !is.na(y_max)) {
           # Add range markers
-          p <- p %>%
+          p <- p |>
             add_trace(
               x = c(xmin, xmax),
               y = c(y_min, y_max),
@@ -192,15 +193,15 @@ plot_posterior_predictive <- function(cdf_data, x_value = NULL, title = NULL,
               marker = list(color = line_colors$reference, size = 8),
               name = "Range Bounds",
               text = c(
-                sprintf("xmin: %.4f<br>P(X ≤ xmin): %.4f", xmin, y_min),
-                sprintf("xmax: %.4f<br>P(X ≤ xmax): %.4f", xmax, y_max)
+                sprintf("xmin: %.4f<br>P(X \u2264 xmin): %.4f", xmin, y_min),
+                sprintf("xmax: %.4f<br>P(X \u2264 xmax): %.4f", xmax, y_max)
               ),
               hoverinfo = 'text'
             )
 
           # Add reference lines if requested
           if (show_reference_lines) {
-            p <- p %>%
+            p <- p |>
               add_segments(
                 x = c(min(cdf_data$x), min(cdf_data$x)),
                 xend = c(xmin, xmax),
@@ -209,7 +210,7 @@ plot_posterior_predictive <- function(cdf_data, x_value = NULL, title = NULL,
                 line = list(color = line_colors$reference,
                             width = 1, dash = 'dot'),
                 showlegend = FALSE
-              ) %>%
+              ) |>
               add_segments(
                 x = c(xmin, xmax),
                 xend = c(xmin, xmax),
@@ -226,7 +227,7 @@ plot_posterior_predictive <- function(cdf_data, x_value = NULL, title = NULL,
   }
 
   # Set layout
-  p <- p %>% layout(
+  p <- p |> layout(
     title = title,
     xaxis = list(title = "Value"),
     yaxis = list(

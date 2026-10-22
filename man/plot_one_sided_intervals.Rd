@@ -33,21 +33,20 @@ Creates interactive plots showing one-sided statistical intervals (CI, PI, TI)
 with separate plots for upper and lower bounds.
 }
 \examples{
-\dontrun{
-# First calculate intervals
-result <- bayesian_statistical_intervals(
-  data = mcmc_samples,
-  fixed_effects = "beta0",
-  random_params = "sigma2",
-  by = "Group"
+set.seed(1)
+mcmc <- data.frame(
+  Group = rep(c("A", "B"), each = 50),
+  beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+  sigma2 = rgamma(100, shape = 20, rate = 10),
+  age = rnorm(100, 50, 5)
 )
 
-# Then plot one-sided intervals
-plots <- plot_one_sided_intervals(result$data)
-
-# Display upper and lower plots
+res <- bayesian_statistical_intervals(
+  mcmc, fixed_effects = "beta", random_params = "sigma2",
+  by = "Group", tolerance_interval_level = 90
+)
+plots <- plot_one_sided_intervals(res$data)
 plots$upper
 plots$lower
-}
 
 }

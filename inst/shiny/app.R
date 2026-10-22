@@ -19,6 +19,7 @@
 
 ### SETUP ###
 library(shiny)
+library(BayesianStatisticalIntervalsCalculator)
 library(DT)
 library(bslib)
 library(dplyr)
@@ -265,17 +266,7 @@ ui <- fluidPage(
 
   div(
     style = "margin-bottom: 15px;",  # Add some space below the title section
-    h1("Bayesian Statistical Intervals (BSI)", style = "margin-bottom: 5px;"),  # Main title with reduced bottom margin
-    p(
-      style = "font-size: 0.9em; color: #ddd; margin-top: 0;",  # Smaller font, light color, no top margin
-      "Technical Guide: ",
-      a(
-        href = "https://r-connect-dev.prod.p488440267176.aws-emea.sanofi.com/content/44966b86-ac33-4d42-9db9-4e4f69a03835/Notebook3_DocumentationBSIApp_Version_0.2.html",
-        target = "_blank",
-        style = "color: #90EE90; text-decoration: underline;",
-        "LINK"
-      )
-    )
+    h1("Bayesian Statistical Intervals (BSI)", style = "margin-bottom: 5px;")  # Main title with reduced bottom margin
   ),
 
   sidebarLayout(

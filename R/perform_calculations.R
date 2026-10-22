@@ -21,20 +21,19 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
-#' data <- data.frame(
-#'   t1 = c(-0.82, -0.75, -0.79),
-#'   v1 = c(0.91, 0.88, 0.90),
-#'   By = c(1, 1, 2)
+#' set.seed(1)
+#' mcmc <- data.frame(
+#'   Group = rep(c("A", "B"), each = 50),
+#'   beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+#'   sigma2 = rgamma(100, shape = 20, rate = 10),
+#'   age = rnorm(100, 50, 5)
 #' )
-#' result <- perform_calculations(
-#'   data = data,
-#'   fixed_effects = "t1",
-#'   random_params = "v1",
-#'   by = "By",
-#'   tolerance_level = 90
+#'
+#' res <- perform_calculations(
+#'   mcmc, fixed_effects = "beta", random_params = "sigma2",
+#'   by = "Group", tolerance_level = 90
 #' )
-#' }
+#' res$data
 #'
 #' @export
 perform_calculations <- function(data,
@@ -92,9 +91,9 @@ perform_calculations <- function(data,
 
   # Ensure only one row per unique "By" value if there are duplicates
   if (any(table(combined_result$By) > 1)) {
-    combined_result <- combined_result %>%
-      dplyr::group_by(By) %>%
-      dplyr::summarise(dplyr::across(dplyr::everything(), dplyr::first)) %>%
+    combined_result <- combined_result |>
+      dplyr::group_by(By) |>
+      dplyr::summarise(dplyr::across(dplyr::everything(), dplyr::first)) |>
       dplyr::ungroup()
   }
 

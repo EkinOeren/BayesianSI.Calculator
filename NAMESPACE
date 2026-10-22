@@ -27,22 +27,35 @@ export(quantile_scatterplot)
 export(start_app_view)
 import(DT)
 import(ggplot2)
-importFrom(data.table,":=")
-importFrom(data.table,as.data.table)
-importFrom(data.table,copy)
-importFrom(data.table,fread)
-importFrom(data.table,setorder)
-importFrom(plotly,add_markers)
-importFrom(plotly,add_ribbons)
-importFrom(plotly,add_segments)
-importFrom(plotly,add_trace)
-importFrom(plotly,layout)
-importFrom(plotly,plot_ly)
+importFrom(data.table,
+  ":=",
+  .N,
+  as.data.table,
+  copy,
+  fread,
+  setorder
+)
+importFrom(grDevices,colorRampPalette)
+importFrom(plotly,
+  add_markers,
+  add_ribbons,
+  add_segments,
+  add_trace,
+  layout,
+  plot_ly
+)
 importFrom(readr,read_csv)
-importFrom(stats,approx)
-importFrom(stats,cov)
-importFrom(stats,pnorm)
-importFrom(stats,qnorm)
-importFrom(stats,quantile)
-importFrom(utils,read.csv)
-importFrom(utils,read.table)
+importFrom(shiny,tagList)
+importFrom(stats,
+  approx,
+  cov,
+  median,
+  pnorm,
+  qnorm,
+  quantile
+)
+importFrom(utils,
+  head,
+  read.csv,
+  read.table
+)

@@ -22,17 +22,13 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' data <- data.frame(
-#'   By = c("A", "A", "A", "A"),
+#'   By = rep("A", 4),
 #'   lower_quantile = c(-2, -1, -3, -2),
 #'   upper_quantile = c(2, 3, 1, 2)
 #' )
-#' gP_mean_A <- 0.5
-#' result <- calculate_gamma_difference(
-#'   data, gP_mean_A, c(-2, -1.5, -1), 95
-#' )
-#' }
+#' calculate_gamma_difference(data, gP_mean = 0.5, point_x_vector = c(-2, -1.5, -1),
+#'                            gamma_actual = 95)
 #'
 #' @export
 calculate_gamma_difference <- function(scatter_data, gP_mean, point_x_vector, gamma_actual) {

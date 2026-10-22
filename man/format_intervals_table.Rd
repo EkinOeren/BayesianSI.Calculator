@@ -18,3 +18,19 @@ A DT::datatable object with formatted headers showing interval percentages
 Creates a formatted DT table with two header levels showing statistical intervals
 in the same format as the Shiny app.
 }
+\examples{
+set.seed(1)
+mcmc <- data.frame(
+  Group = rep(c("A", "B"), each = 50),
+  beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+  sigma2 = rgamma(100, shape = 20, rate = 10),
+  age = rnorm(100, 50, 5)
+)
+
+res <- perform_calculations(
+  mcmc, fixed_effects = "beta", random_params = "sigma2",
+  by = "Group", tolerance_level = 90
+)
+tbl <- format_intervals_table(res)
+
+}

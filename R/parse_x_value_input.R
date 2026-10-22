@@ -1,8 +1,8 @@
 #' Parse X Value Input
 #'
-#' Parses a string input representing either a single numeric value or a range [min,max].
+#' Parses a string input representing either a single numeric value or a range \[min,max\].
 #'
-#' @param input_text Character string to parse, either a single number or a range in the format "[min,max]"
+#' @param input_text Character string to parse, either a single number or a range in the format "\[min,max\]"
 #'
 #' @return A list with components:
 #' \itemize{

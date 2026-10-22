@@ -25,16 +25,10 @@ This function takes interval data and performs two main operations:
 }
 }
 \examples{
-\dontrun{
 data <- data.frame(
-  Median = c(1),
-  CI_Lower = c(0.5),
-  CI_Upper = c(1.5),
-  TI_Lower = c(0.3),
-  TI_Upper = c(1.7),
-  PI_Lower = c(0.4),
-  PI_Upper = c(1.6)
+  Median = 1, CI_Lower = 0.5, CI_Upper = 1.5,
+  TI_Lower = 0.3, TI_Upper = 1.7, PI_Lower = 0.4, PI_Upper = 1.6
 )
-result <- lognorm_adjuster(data, TRUE)
-}
+lognorm_adjuster(data, log_normal = TRUE)
+
 }

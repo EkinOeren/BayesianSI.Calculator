@@ -77,44 +77,27 @@ satisfy the constraint g2 = 2*gP_mean - g1, where gP_mean is the average midpoin
 lower and upper quantiles.
 }
 \examples{
-\dontrun{
-data <- data.frame(
-  t1 = c(-0.82, -0.75, -0.79),
-  v1 = c(0.91, 0.88, 0.90),
-  cov1 = c(1.2, 1.5, 1.3),
-  By = c(1, 1, 2)
+set.seed(1)
+mcmc <- data.frame(
+  Group = rep(c("A", "B"), each = 50),
+  beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+  sigma2 = rgamma(100, shape = 20, rate = 10),
+  age = rnorm(100, 50, 5)
 )
 
-# Without covariates
-result1 <- bayesian_statistical_intervals(
-  data = data,
-  fixed_effects = "t1",
-  random_params = "v1",
-  by = "By",
-  tolerance_interval_level = 90
+res <- bayesian_statistical_intervals(
+  mcmc, fixed_effects = "beta", random_params = "sigma2",
+  by = "Group", tolerance_interval_level = 90
 )
+res$data
+res$summary
 
-# With covariates
-result2 <- bayesian_statistical_intervals(
-  data = data,
-  fixed_effects = "t1",
-  random_params = "v1",
-  by = "By",
-  tolerance_interval_level = 90,
-  covariate_cols = "cov1",
-  covariate_values = 2.0
+# With a covariate and the Krishnamoorthy two-sided tolerance interval
+res_k <- bayesian_statistical_intervals(
+  mcmc, fixed_effects = "beta", random_params = "sigma2", by = "Group",
+  tolerance_interval_level = 90, credibility_of_tolerance_interval = 80,
+  covariate_cols = "age", covariate_values = 0.1, use_krishnamoorthy = TRUE
 )
-
-# With Krishnamoorthy method
-result3 <- bayesian_statistical_intervals(
-  data = data,
-  fixed_effects = "t1",
-  random_params = "v1",
-  by = "By",
-  tolerance_interval_level = 90,
-  credibility_of_tolerance_interval = 80,
-  use_krishnamoorthy = TRUE
-)
-}
+res_k$data
 
 }

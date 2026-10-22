@@ -32,13 +32,11 @@ for finding quantiles of normal distributions. It works with both single and
 multiple groups of data.
 }
 \examples{
-\dontrun{
 data <- data.frame(
   By = c("A", "A", "B", "B"),
   mean = c(10, 11, 20, 21),
   variance = c(2, 2.1, 3, 3.1)
 )
-result <- calculate_PI(data, percent_for_pi = 95)
-}
+calculate_PI(data, percent_for_pi = 95)
 
 }

@@ -7,7 +7,7 @@
 parse_x_value_input(input_text)
 }
 \arguments{
-\item{input_text}{Character string to parse, either a single number or a range in the format "\link{min,max}"}
+\item{input_text}{Character string to parse, either a single number or a range in the format "[min,max]"}
 }
 \value{
 A list with components:
@@ -21,7 +21,7 @@ A list with components:
 NULL if the input cannot be parsed
 }
 \description{
-Parses a string input representing either a single numeric value or a range \link{min,max}.
+Parses a string input representing either a single numeric value or a range [min,max].
 }
 \examples{
 parse_x_value_input("5.2")

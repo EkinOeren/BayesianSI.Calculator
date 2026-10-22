@@ -40,14 +40,19 @@ Creates a dataframe containing cumulative distribution function (CDF) data
 for posterior predictive distribution analysis.
 }
 \examples{
-\dontrun{
-# Single chain example
-pred_dist <- calculate_predicted_distributions(data, "fixed1", "random1",
-                                             "Single Chain Dataset", 95)
-cdf_data <- create_cdf_dataframe(pred_dist, by_value = "Single Chain")
+set.seed(1)
+mcmc <- data.frame(
+  Group = rep(c("A", "B"), each = 50),
+  beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+  sigma2 = rgamma(100, shape = 20, rate = 10),
+  age = rnorm(100, 50, 5)
+)
 
-# Multiple chain example
-cdf_data_A <- create_cdf_dataframe(pred_dist, by_value = "A")
-}
+pred_dist <- calculate_predicted_distributions(
+  mcmc, fixed_effects = "beta", random_params = "sigma2",
+  by = "Group", tolerance_level = 90
+)
+cdf_data <- create_cdf_dataframe(pred_dist, by_value = "A")
+head(cdf_data)
 
 }
