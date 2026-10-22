@@ -20,11 +20,11 @@ The package is not yet available on CRAN. You can install it from GitHub:
 
 ```r
 # install.packages("devtools")
-devtools::install_github("Sanofi-GitHub/BSI-APP/tree/master")
+devtools::install_github("Sanofi-Public/BayesianSI.Calculator")
 ```
 
 For access issues or questions about installation, please contact the development team or the maintainer:
-Ekin Ören (Ekin.Oeren@sanofi.com)
+Ekin Ören (ekin.oren.3@gmail.com)
 
 ## Quick Start
 
@@ -517,13 +517,13 @@ R package version 0.x.x.
 
 ## License
 
-This package is licensed under the [MIT License](LICENSE.md). Copyright © 2025 Sanofi. All rights reserved.
+This package is licensed under the [Apache License, Version 2.0](LICENSE.md). Copyright holder: Sanofi. See the [NOTICE](NOTICE) file for attribution details.
 
 ## Contact
 
 For bug reports, feature requests, and other questions:
 - GitHub Issues: https://github.com/Sanofi-Public/BayesianSI.Calculator/issues
-- Maintainer: Sebastian Schmitz (sebastian.schmitz@sanofi.com)
+- Maintainer: Ekin Ören (ekin.oren.3@gmail.com)
 
 ---
 
