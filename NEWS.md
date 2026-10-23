@@ -12,7 +12,7 @@ First CRAN release.
   `use_krishnamoorthy = TRUE`. `plot_krishnamoorthy()` and
   `quantile_scatterplot()` visualize the lower/upper quantile draws and the
   optimal point.
-* Reducible-uncertainty ratios (`ReducibleUpper`, `ReducibleLower`) are
+* Reducible imprecision (`ReducibleUpper`, `ReducibleLower`) is
   returned with the intervals, and `plot_one_sided_intervals()` can display
   them.
 * `create_CDF()`, `plot_posterior_predictive()` and `get_probability_table()`

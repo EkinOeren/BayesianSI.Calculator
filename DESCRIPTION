@@ -1,20 +1,23 @@
 Package: BayesianStatisticalIntervalsCalculator
-Title: Credible, Prediction and Tolerance Intervals from MCMC Output
+Title: Bayesian Intervals, Reducible Imprecision and Posterior Predictive Distributions
 Version: 2.0.0
 Authors@R:
     c(person("Ekin", "Ören", , "ekin.oren.3@gmail.com", role = c("aut", "cre")),
       person("Sebastian", "Schmitz", role = "aut"),
       person("Sanofi", role = c("cph", "fnd")))
-Description: Computes and visualizes credible intervals, prediction intervals
-    and tolerance intervals, together with posterior predictive
-    distributions, from Markov chain Monte Carlo (MCMC) draws of a Bayesian
-    linear mixed model. Users choose the fixed effects, variance components
-    and optional covariates that define the model, and results can be
-    back-transformed from the log scale. Two-sided tolerance intervals with
-    asymmetric limits can be obtained with the Krishnamoorthy approach, and
-    reducible-uncertainty ratios contrast the tolerance and prediction
-    bounds relative to the median. An interactive 'shiny' application is
-    included.
+Description: Calculates and visualizes Bayesian credible, prediction and
+    tolerance intervals, and posterior predictive distributions, for linear
+    mixed models from Markov chain Monte Carlo (MCMC) samples of the model
+    parameters. Users define the model through fixed effects, variance
+    components and optional covariates, and results can be back-transformed
+    from the log scale. Tolerance intervals are derived from the posterior
+    predictive distribution following Krishnamoorthy and Mathew (2009)
+    <doi:10.1002/9780470473900>, including the construction of one-dimensional
+    two-sided intervals from the bivariate posterior of the lower and upper
+    quantiles. Reducible imprecision measures the share of the
+    tolerance-interval half-width that exceeds the prediction-interval
+    half-width, that is, the epistemic uncertainty that more data could
+    reduce. An interactive 'shiny' application is included.
 License: Apache License (== 2.0)
 URL: https://github.com/Sanofi-Public/BayesianSI.Calculator
 BugReports: https://github.com/Sanofi-Public/BayesianSI.Calculator/issues
