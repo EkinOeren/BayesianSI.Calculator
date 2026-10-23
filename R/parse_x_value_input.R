@@ -5,7 +5,7 @@
 #' @param input_text Character string to parse, either a single number or a range in the format "\[min,max\]"
 #'
 #' @return A list with components:
-#' \itemize{
+#' \describe{
 #'   \item{type}{Either "single" for a single value or "range" for a range}
 #'   \item{value}{The numeric value (if type is "single")}
 #'   \item{xmin}{The minimum value (if type is "range")}

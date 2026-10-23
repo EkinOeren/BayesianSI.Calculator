@@ -11,7 +11,7 @@ parse_x_value_input(input_text)
 }
 \value{
 A list with components:
-\itemize{
+\describe{
 \item{type}{Either "single" for a single value or "range" for a range}
 \item{value}{The numeric value (if type is "single")}
 \item{xmin}{The minimum value (if type is "range")}

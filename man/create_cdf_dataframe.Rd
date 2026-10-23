@@ -25,7 +25,7 @@ create_cdf_dataframe(
 }
 \value{
 A dataframe containing:
-\itemize{
+\describe{
 \item{x}{Numeric vector of x values (transformed if log_normal = TRUE)}
 \item{x_log}{Numeric vector of x values in log space}
 \item{y_mean}{Numeric vector of mean CDF values}

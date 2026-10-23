@@ -10,10 +10,9 @@ Actions and win-builder runs. If CRAN's spell check flags words such as
 
 ## Test environments
 
-* local: Windows 11, R 4.2.3
-* GitHub Actions: ubuntu-latest (devel, release, oldrel-1),
-  macos-latest (release), windows-latest (release)
-  [UPDATE BEFORE SUBMISSION: confirm the matrix in the final workflow run]
+* local: Windows 11, R 4.2.3 (0 errors | 0 warnings | 0 notes besides "new submission" and local-environment notes)
+* GitHub Actions (R-CMD-check, r-lib/actions): ubuntu-latest (R devel, release, oldrel-1),
+  macos-latest (R 4.6.1), windows-latest (release)
 * win-builder: devel and release [UPDATE BEFORE SUBMISSION]
 
 ## Notes for the reviewers
