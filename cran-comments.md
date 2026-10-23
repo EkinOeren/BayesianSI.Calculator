@@ -30,4 +30,5 @@ Actions and win-builder runs. If CRAN's spell check flags words such as
   itself (the Bootswatch theme supplied by 'bslib' may load a web font in
   the user's browser). The `shiny.maxRequestSize` option is set while the
   application runs and restored afterwards.
+* The DESCRIPTION cites Krishnamoorthy and Mathew (2009), <doi:10.1002/9780470473900>. The DOI resolves (doi.org and Crossref), but the publisher's site (Wiley) answers automated requests with HTTP 403, so the URL check reports "Forbidden".
 * There are no reverse dependencies (new package).

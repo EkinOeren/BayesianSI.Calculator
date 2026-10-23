@@ -66,7 +66,7 @@ test_that("calculate_predicted_distributions validates its inputs", {
   expect_error(calculate_predicted_distributions(dat, "b1", "s2", "nope", 90), "not found")
   expect_error(calculate_predicted_distributions(dat, "b1", "s2", "grp", 100), "between 0 and 100")
   expect_error(calculate_predicted_distributions(dat, "b1", "s2", "grp", 0), "between 0 and 100")
-  expect_error(pd(multiplication_factor = "a"), "numeric")
+  expect_error(pd(multiplication_factor = "a"), "positive number")
   expect_error(pd(covariate_cols = "nope"), "not found")
   expect_error(pd(covariate_cols = "cov", covariate_values = c(1, 2)), "must match")
 })

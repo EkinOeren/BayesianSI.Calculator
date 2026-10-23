@@ -21,6 +21,10 @@
 #'   \item total_points: Total number of points evaluated
 #' }
 #'
+#' @references
+#' Krishnamoorthy K, Mathew T (2009). \emph{Statistical Tolerance Regions: Theory,
+#' Applications, and Computation}. Wiley, Hoboken, NJ. \doi{10.1002/9780470473900}.
+#'
 #' @examples
 #' data <- data.frame(
 #'   By = rep("A", 4),

@@ -101,3 +101,10 @@ res_k <- bayesian_statistical_intervals(
 res_k$data
 
 }
+\references{
+Wolfinger RD (1998). Tolerance intervals for variance component models using
+Bayesian simulation. \emph{Journal of Quality Technology}, 30(1).
+
+Krishnamoorthy K, Mathew T (2009). \emph{Statistical Tolerance Regions: Theory,
+Applications, and Computation}. Wiley, Hoboken, NJ. \doi{10.1002/9780470473900}.
+}

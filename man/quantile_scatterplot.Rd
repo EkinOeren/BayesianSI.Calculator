@@ -90,3 +90,7 @@ p2 <- quantile_scatterplot(pred_dist = pred_dist, tolerance_level = 95,
                            ellipse_confidence = 95)
 
 }
+\references{
+Krishnamoorthy K, Mathew T (2009). \emph{Statistical Tolerance Regions: Theory,
+Applications, and Computation}. Wiley, Hoboken, NJ. \doi{10.1002/9780470473900}.
+}

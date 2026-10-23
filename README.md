@@ -36,6 +36,7 @@ toy_data <- data.frame(
   EGTPTNUM = c(60, 60, 60, 60, 60, 90, 90, 90, 90, 90),
   s2 = c(74.18, 58.92, 75.04, 64.75, 67.81, 59.75, 51.91, 57.58, 64.76, 52.09),
   b2 = c(-5.23, -3.97, -2.92, -7.64, -2.57, 0.61, -2.02, -0.41, 0.08, 2.43),
+  b3 = c(6.85, 10.65, 10.78, 6.43, 8.96, 8.83, 4.37, 7.89, 9.38, 8.18),
   b4 = c(1.32, 3.68, 3.39, 3.13, 3.50, 5.57, 4.90, 1.71, 3.58, 3.36)
 )
 
@@ -64,6 +65,7 @@ The core function `bayesian_statistical_intervals()` computes three types of int
 - **Credible Intervals (CI)**: Bayesian confidence intervals for the median
 - **Prediction Intervals (PI)**: Intervals for future individual observations
 - **Tolerance Intervals (TI)**: Intervals containing a specified proportion of the population with given confidence
+- **Reducible imprecision**: the share of the tolerance-interval half-width that exceeds the prediction-interval half-width, i.e. the epistemic uncertainty that more data could reduce. It is returned as `ReducibleUpper = (TI_Upper - PI_Upper) / (TI_Upper - Median)` and `ReducibleLower = (TI_Lower - PI_Lower) / (TI_Lower - Median)`
 
 **Parameters:**
 
@@ -204,7 +206,7 @@ result <- bayesian_statistical_intervals(
 # Create one-sided plots
 one_sided_plots <- plot_one_sided_intervals(
   data = result$data,
-  show_reducible = TRUE  # Show reducible uncertainty
+  show_reducible = TRUE  # Show reducible imprecision
 )
 
 # Display plots
@@ -507,13 +509,24 @@ Where:
 
 ## Citation
 
-If you use this package in your research, please cite:
+If you use this package in your research, please cite the package and the
+methods it implements. Until the accompanying paper is published, cite the
+package as:
 
 ```
-Ören, E. (2024). BayesianStatisticalIntervalsCalculator: 
-Bayesian Statistical Intervals from MCMC Samples. 
-R package version 0.x.x.
+Ören E, Schmitz S (2026). BayesianStatisticalIntervalsCalculator: Reducible
+Imprecision and Bayesian Intervals for Mixed Models. R package version 2.0.0.
 ```
+
+Methods:
+
+- Krishnamoorthy K, Mathew T (2009). *Statistical Tolerance Regions: Theory,
+  Applications, and Computation*. Wiley, Hoboken, NJ.
+  [doi:10.1002/9780470473900](https://doi.org/10.1002/9780470473900).
+  The two-sided tolerance interval construction (`use_krishnamoorthy = TRUE`)
+  follows this book.
+- Wolfinger RD (1998). Tolerance intervals for variance component models using
+  Bayesian simulation. *Journal of Quality Technology*, 30(1).
 
 ## License
 

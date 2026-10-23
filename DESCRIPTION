@@ -1,5 +1,5 @@
 Package: BayesianStatisticalIntervalsCalculator
-Title: Bayesian Intervals, Reducible Imprecision and Posterior Predictive Distributions
+Title: Reducible Imprecision and Bayesian Intervals for Mixed Models
 Version: 2.0.0
 Authors@R:
     c(person("Ekin", "Ören", , "ekin.oren.3@gmail.com", role = c("aut", "cre")),

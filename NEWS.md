@@ -29,6 +29,8 @@ First CRAN release.
   `htmltools` are no longer used (confidence ellipses are computed
   internally and the application theme comes from `bslib`). `later` and
   `bslib` are now imported because the application needs them.
+* Inputs are validated with clear error messages: interval levels, the multiplication factor, covariate arguments, column types, and the `by` column. Missing or infinite MCMC draws and negative variances now stop with an error; previously missing draws were silently treated as zero.
+* The documentation cites Krishnamoorthy and Mathew (2009) for the tolerance interval methods.
 * The native pipe `|>` replaces `%>%`.
 * All examples are now runnable and use small synthetic data.
 * `start_app_view()` restores the `shiny.maxRequestSize` option when the

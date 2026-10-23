@@ -64,3 +64,7 @@ optimal <- find_optimal_point(pred_dist, gP_mean, gamma_actual = 80)
 optimal[["A"]]
 
 }
+\references{
+Krishnamoorthy K, Mathew T (2009). \emph{Statistical Tolerance Regions: Theory,
+Applications, and Computation}. Wiley, Hoboken, NJ. \doi{10.1002/9780470473900}.
+}

@@ -39,6 +39,13 @@
 #' satisfy the constraint g2 = 2*gP_mean - g1, where gP_mean is the average midpoint of the
 #' lower and upper quantiles.
 #'
+#' @references
+#' Wolfinger RD (1998). Tolerance intervals for variance component models using
+#' Bayesian simulation. \emph{Journal of Quality Technology}, 30(1).
+#'
+#' Krishnamoorthy K, Mathew T (2009). \emph{Statistical Tolerance Regions: Theory,
+#' Applications, and Computation}. Wiley, Hoboken, NJ. \doi{10.1002/9780470473900}.
+#'
 #' @examples
 #' set.seed(1)
 #' mcmc <- data.frame(
@@ -82,6 +89,40 @@ bayesian_statistical_intervals <- function(data,
   # Input validation
   if (!is.data.frame(data)) {
     stop("'data' must be a data frame")
+  }
+  if (missing(tolerance_interval_level)) {
+    stop("'tolerance_interval_level' is required", call. = FALSE)
+  }
+  if (missing(fixed_effects) || !is.character(fixed_effects) || length(fixed_effects) == 0) {
+    stop("'fixed_effects' must be a character vector of column names", call. = FALSE)
+  }
+  if (missing(random_params) || !is.character(random_params) || length(random_params) == 0) {
+    stop("'random_params' must be a character vector of column names", call. = FALSE)
+  }
+  if (!is.character(by) || length(by) != 1) {
+    stop("'by' must be a single column name", call. = FALSE)
+  }
+  check_level(tolerance_interval_level, "tolerance_interval_level")
+  check_level(credible_interval_level, "credible_interval_level")
+  check_level(prediction_interval_level, "prediction_interval_level")
+  check_level(credibility_of_tolerance_interval, "credibility_of_tolerance_interval")
+  check_positive(multiplication_factor, "multiplication_factor")
+  check_flag(log_normal, "log_normal")
+  check_flag(use_krishnamoorthy, "use_krishnamoorthy")
+  check_positive(krishnamoorthy_tolerance, "krishnamoorthy_tolerance")
+  if (!is.null(covariate_cols)) {
+    if (!is.character(covariate_cols)) {
+      stop("'covariate_cols' must be a character vector of column names", call. = FALSE)
+    }
+    if (is.null(covariate_values)) {
+      covariate_values <- rep(1, length(covariate_cols))
+    }
+    if (!is.numeric(covariate_values) || any(!is.finite(covariate_values))) {
+      stop("'covariate_values' must be numeric and finite", call. = FALSE)
+    }
+    if (length(covariate_values) != length(covariate_cols)) {
+      stop("Length of 'covariate_cols' must match length of 'covariate_values'", call. = FALSE)
+    }
   }
 
   # Check if 'by' is not provided and print warning

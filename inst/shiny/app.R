@@ -68,6 +68,47 @@ create_confidence_ellipse_points <- function(cov_matrix,
 }
 
 
+# Input checks. The package keeps an identical copy in R/validate_inputs.R so
+# that this application can run on its own; keep the two in sync.
+check_positive <- function(x, name) {
+  if (!is.numeric(x) || length(x) != 1 || !is.finite(x) || x <= 0) {
+    stop(sprintf("'%s' must be a single positive number", name), call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+check_draw_columns <- function(dt, cols, label) {
+  if (nrow(dt) == 0) {
+    stop("'data' has no rows", call. = FALSE)
+  }
+  for (col in cols) {
+    x <- dt[[col]]
+    if (!is.numeric(x)) {
+      converted <- suppressWarnings(as.numeric(as.character(x)))
+      if (any(is.na(converted) & !is.na(x))) {
+        stop(sprintf("%s column '%s' must be numeric but contains non-numeric values", label, col),
+             call. = FALSE)
+      }
+      x <- converted
+    }
+    bad <- which(!is.finite(x))
+    if (length(bad) > 0) {
+      stop(sprintf("%s column '%s' contains %d missing or non-finite value(s) (first at row %d)",
+                   label, col, length(bad), bad[1]), call. = FALSE)
+    }
+  }
+  invisible(TRUE)
+}
+
+check_variance <- function(variance_vector) {
+  neg <- which(variance_vector < 0)
+  if (length(neg) > 0) {
+    stop(sprintf("The variance components sum to a negative value in %d draw(s) (first at row %d); variances must be non-negative",
+                 length(neg), neg[1]), call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
 ### UI ###
 ui <- fluidPage(
   theme = bs_theme(preset = "darkly"),
@@ -738,6 +779,19 @@ server <- function(input, output, session) {
     # Create a copy of the data to avoid modifying the original
     dt <- copy(as.data.table(InputData()))
 
+    # Draws must be numeric and complete; NA or infinite draws would otherwise be
+    # silently treated as zero. Errors are shown to the user through ErrorMessage.
+    check_positive(MultiplicationFactorVariances(), "Multiplication factor")
+    check_draw_columns(dt, FixedEffects, "Fixed effect")
+    check_draw_columns(dt, RandomParams, "Variance component")
+    for (k in 1:3) {
+      cov_col_k <- input[[paste0("covariate_", k)]]
+      if (!is.null(cov_col_k) && cov_col_k != "None" && cov_col_k %in% names(dt)) {
+        check_draw_columns(dt, cov_col_k, "Covariate")
+      }
+    }
+    if (anyNA(dt[[By]])) stop(sprintf("By column '%s' contains missing values", By), call. = FALSE)
+
     # Print column types for debugging
     print("Column types before processing:")
     for(col in c(FixedEffects, RandomParams)) {
@@ -795,6 +849,7 @@ server <- function(input, output, session) {
 
       # Calculate total variance
       variance_vector <- rowSums(random_matrix, na.rm = TRUE) * MultiplicationFactorVariances()
+      check_variance(variance_vector)
     } else {
       variance_vector <- rep(0, nrow(dt))
     }

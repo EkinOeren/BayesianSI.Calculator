@@ -42,3 +42,7 @@ calculate_gamma_difference(data, gP_mean = 0.5, point_x_vector = c(-2, -1.5, -1)
                            gamma_actual = 95)
 
 }
+\references{
+Krishnamoorthy K, Mathew T (2009). \emph{Statistical Tolerance Regions: Theory,
+Applications, and Computation}. Wiley, Hoboken, NJ. \doi{10.1002/9780470473900}.
+}

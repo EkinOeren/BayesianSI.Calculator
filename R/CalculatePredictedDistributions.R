@@ -71,9 +71,7 @@ calculate_predicted_distributions <- function(data, fixed_effects, random_params
     stop("'tolerance_level' must be a number between 0 and 100")
   }
 
-  if (!is.numeric(multiplication_factor)) {
-    stop("'multiplication_factor' must be a numeric value")
-  }
+  check_positive(multiplication_factor, "multiplication_factor")
 
   # Validate covariate inputs
   if (!is.null(covariate_cols)) {
@@ -145,6 +143,13 @@ calculate_predicted_distributions <- function(data, fixed_effects, random_params
 
   # Create a copy of the data to avoid modifying the original
   dt <- data.table::copy(data.table::as.data.table(data))
+
+  # Draws must be numeric and complete; NA or infinite draws would otherwise be
+  # silently treated as zero
+  check_draw_columns(dt, fixed_effects, "Fixed effect")
+  check_draw_columns(dt, random_params, "Variance component")
+  if (!is.null(covariate_cols)) check_draw_columns(dt, covariate_cols, "Covariate")
+  if (anyNA(dt[[by]])) stop(sprintf("By column '%s' contains missing values", by), call. = FALSE)
 
   vprint("\n=== Data Summary ===\n")
   vprint("Number of rows:", nrow(dt), "\n")
@@ -220,6 +225,7 @@ calculate_predicted_distributions <- function(data, fixed_effects, random_params
 
     # Calculate total variance
     variance_vector <- rowSums(random_matrix, na.rm = TRUE) * multiplication_factor
+    check_variance(variance_vector)
 
     vprint("Random parameters matrix (first few rows):\n")
     if (verbose) print(head(random_matrix))
