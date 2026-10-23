@@ -27,6 +27,7 @@ export(quantile_scatterplot)
 export(start_app_view)
 import(DT)
 import(ggplot2)
+importFrom(bslib,bs_theme)
 importFrom(data.table,
   ":=",
   .N,
@@ -36,6 +37,7 @@ importFrom(data.table,
   setorder
 )
 importFrom(grDevices,colorRampPalette)
+importFrom(later,later)
 importFrom(plotly,
   add_markers,
   add_ribbons,

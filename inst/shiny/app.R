@@ -1,4 +1,4 @@
-# Echo's Statsinator
+# Bayesian Statistical Intervals (BSI) Shiny application
 # This Shiny app allows users to upload CSV data, perform statistical calculations,
 # and visualize the results.
 
@@ -27,11 +27,9 @@ library(dplyr)
 #for reading in large files
 library(readr)
 library(data.table)
-library(utf8)
 
 #for plotting needs
 library(ggplot2)
-library(grid)
 library(plotly)
 
 # Computes confidence ellipse coordinates from covariance and center without external dependencies.
@@ -440,7 +438,6 @@ ui <- fluidPage(
 ### SERVER ###
 server <- function(input, output, session) {
 
-  options(shiny.maxRequestSize=30*1024^2)
 
   ### Variables
   InputData <- reactiveVal()
