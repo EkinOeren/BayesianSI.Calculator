@@ -2,7 +2,7 @@
 % Please edit documentation in R/lognorm_adjuster.R
 \name{lognorm_adjuster}
 \alias{lognorm_adjuster}
-\title{Adjust Log-Normal Data and Calculate Reducible Uncertainty}
+\title{Adjust Log-Normal Data and Calculate Reducible Imprecision}
 \usage{
 lognorm_adjuster(IntervalsOutputInitial, log_normal)
 }
@@ -14,14 +14,14 @@ Median, CI_Lower, CI_Upper, TI_Lower, TI_Upper, PI_Lower, PI_Upper}
 }
 \value{
 A data frame with the original columns plus:
-\item{ReducibleUpper}{Upper reducible uncertainty percentage}
-\item{ReducibleLower}{Lower reducible uncertainty percentage}
+\item{ReducibleUpper}{Upper reducible imprecision percentage}
+\item{ReducibleLower}{Lower reducible imprecision percentage}
 }
 \description{
 This function takes interval data and performs two main operations:
 \enumerate{
 \item If log_normal is TRUE, exponentiates the values to transform from log space
-\item Calculates reducible uncertainty percentages for upper and lower bounds
+\item Calculates reducible imprecision percentages for upper and lower bounds
 }
 }
 \examples{

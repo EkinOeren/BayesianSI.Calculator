@@ -9,7 +9,7 @@ format_intervals_table(result, show_reducible = FALSE)
 \arguments{
 \item{result}{Output list from perform_calculations() containing data and summary}
 
-\item{show_reducible}{Logical, whether to include reducible uncertainty columns (default = FALSE)}
+\item{show_reducible}{Logical, whether to include reducible imprecision columns (default = FALSE)}
 }
 \value{
 A DT::datatable object with formatted headers showing interval percentages

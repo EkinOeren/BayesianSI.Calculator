@@ -1,16 +1,16 @@
-#' Adjust Log-Normal Data and Calculate Reducible Uncertainty
+#' Adjust Log-Normal Data and Calculate Reducible Imprecision
 #'
 #' This function takes interval data and performs two main operations:
 #' 1. If log_normal is TRUE, exponentiates the values to transform from log space
-#' 2. Calculates reducible uncertainty percentages for upper and lower bounds
+#' 2. Calculates reducible imprecision percentages for upper and lower bounds
 #'
 #' @param IntervalsOutputInitial A data frame containing interval data with columns:
 #'   Median, CI_Lower, CI_Upper, TI_Lower, TI_Upper, PI_Lower, PI_Upper
 #' @param log_normal Logical indicating whether to transform data from log space
 #'
 #' @return A data frame with the original columns plus:
-#'   \item{ReducibleUpper}{Upper reducible uncertainty percentage}
-#'   \item{ReducibleLower}{Lower reducible uncertainty percentage}
+#'   \item{ReducibleUpper}{Upper reducible imprecision percentage}
+#'   \item{ReducibleLower}{Lower reducible imprecision percentage}
 #'
 #' @export
 #'
@@ -34,7 +34,7 @@ lognorm_adjuster <- function(IntervalsOutputInitial, log_normal) {
                              TI_Lower, TI_Upper, PI_Lower, PI_Upper), exp))
   }
 
-  # Add the calculation for Reducible Uncertainty
+  # Add the calculation for Reducible Imprecision
   data$ReducibleUpper <- ((data$TI_Upper - data$PI_Upper)/(data$TI_Upper - data$Median))
   data$ReducibleLower <- ((data$TI_Lower - data$PI_Lower)/(data$TI_Lower - data$Median))
 

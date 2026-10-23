@@ -4,7 +4,7 @@
 #' in the same format as the Shiny app.
 #'
 #' @param result Output list from perform_calculations() containing data and summary
-#' @param show_reducible Logical, whether to include reducible uncertainty columns (default = FALSE)
+#' @param show_reducible Logical, whether to include reducible imprecision columns (default = FALSE)
 #'
 #' @return A DT::datatable object with formatted headers showing interval percentages
 #' @import DT
@@ -31,10 +31,13 @@ format_intervals_table <- function(result, show_reducible = FALSE) {
   summary_text <- result$summary
 
   # Extract percentages from summary text using regex
-  ci_percent <- as.numeric(regmatches(summary_text, regexpr("\\d+(?=% credibility)", summary_text, perl = TRUE)))
+  # Both pipelines are supported: bayesian_statistical_intervals() writes
+  # "credible interval" / "credibility of tolerance", perform_calculations()
+  # writes "credibility interval" / "confidence of tolerance".
+  ci_percent <- as.numeric(regmatches(summary_text, regexpr("\\d+(?=% credib(?:le|ility) interval)", summary_text, perl = TRUE)))
   pi_percent <- as.numeric(regmatches(summary_text, regexpr("\\d+(?=% prediction)", summary_text, perl = TRUE)))
   ti_percent <- as.numeric(regmatches(summary_text, regexpr("\\d+(?=% tolerance)", summary_text, perl = TRUE)))
-  conf_percent <- as.numeric(regmatches(summary_text, regexpr("\\d+(?=% confidence)", summary_text, perl = TRUE)))
+  conf_percent <- as.numeric(regmatches(summary_text, regexpr("\\d+(?=% (?:confidence|credibility) of tolerance)", summary_text, perl = TRUE)))
 
   # Check if single chain
   is_single_chain <- length(unique(data$By)) == 1 &&

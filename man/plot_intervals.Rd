@@ -14,7 +14,7 @@ plot_intervals(
 \arguments{
 \item{result}{A list output from perform_calculations() containing data and summary}
 
-\item{show_reducible}{Logical, whether to show reducible uncertainty ribbons (default = FALSE)}
+\item{show_reducible}{Logical, whether to show reducible imprecision ribbons (default = FALSE)}
 
 \item{x_axis_title}{Character, custom title for x-axis (optional)}
 

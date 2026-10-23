@@ -15,7 +15,7 @@ plot_one_sided_intervals(
 \item{data}{A data frame containing interval data with columns:
 By, Median, CI_Lower, CI_Upper, PI_Lower, PI_Upper, TI_Lower, TI_Upper}
 
-\item{show_reducible}{Logical, whether to show reducible uncertainty ribbons (default = FALSE)}
+\item{show_reducible}{Logical, whether to show reducible imprecision ribbons (default = FALSE)}
 
 \item{log_normal}{Logical, whether values are in log-normal scale (default = FALSE)}
 

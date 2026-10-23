@@ -3,6 +3,14 @@
 #' This function coordinates the calculation of various statistical intervals including
 #' predicted distributions, confidence intervals, tolerance intervals, and prediction intervals.
 #'
+#' @section Relationship to \code{bayesian_statistical_intervals()}:
+#' \code{\link{bayesian_statistical_intervals}} is the main function of the package. It
+#' supports covariates, the Krishnamoorthy two-sided tolerance intervals and returns the
+#' predicted distributions. \code{perform_calculations()} is kept for backward
+#' compatibility; new code should use \code{bayesian_statistical_intervals()}. Note that
+#' this function reports reducible imprecision as a percentage, whereas
+#' \code{bayesian_statistical_intervals()} reports it as a fraction.
+#'
 #' @param data A data frame containing the input data
 #' @param fixed_effects Character vector of column names for fixed effects
 #' @param random_params Character vector of column names for random parameters
@@ -16,7 +24,7 @@
 #'
 #' @return A list containing:
 #' \itemize{
-#'   \item data: A data frame with calculated intervals and reducible uncertainty metrics
+#'   \item data: A data frame with calculated intervals and reducible imprecision metrics
 #'   \item summary: A string summarizing the calculation parameters
 #' }
 #'
@@ -97,7 +105,7 @@ perform_calculations <- function(data,
       dplyr::ungroup()
   }
 
-  # Add reducible uncertainty calculations
+  # Add reducible imprecision calculations
   combined_result$ReducibleUpper <- ((combined_result$TI_Upper - combined_result$PI_Upper) /
                                        (combined_result$TI_Upper - combined_result$Median))
   combined_result$ReducibleLower <- ((combined_result$TI_Lower - combined_result$PI_Lower) /
@@ -114,7 +122,7 @@ perform_calculations <- function(data,
                   "PI_Lower", "PI_Upper")
     combined_result[log_cols] <- lapply(combined_result[log_cols], exp)
 
-    # Recalculate reducible uncertainty after transformation
+    # Recalculate reducible imprecision after transformation
     combined_result$ReducibleUpper <- ((combined_result$TI_Upper - combined_result$PI_Upper) /
                                          (combined_result$TI_Upper - combined_result$Median))
     combined_result$ReducibleLower <- ((combined_result$TI_Lower - combined_result$PI_Lower) /

@@ -21,7 +21,7 @@
 #'
 #' @return A list containing:
 #' \itemize{
-#' \item data: A data frame with calculated intervals and reducible uncertainty metrics
+#' \item data: A data frame with calculated intervals and reducible imprecision metrics
 #' \item summary: A string summarizing the calculation parameters
 #' \item krishnamoorthy_results: If use_krishnamoorthy=TRUE, a list of Krishnamoorthy method results
 #' }
@@ -177,7 +177,7 @@ bayesian_statistical_intervals <- function(data,
       dplyr::ungroup()
   }
 
-  # Add reducible uncertainty calculations
+  # Add reducible imprecision calculations
   combined_result$ReducibleUpper <- ((combined_result$TI_Upper - combined_result$PI_Upper) /
                                        (combined_result$TI_Upper - combined_result$Median))
   combined_result$ReducibleLower <- ((combined_result$TI_Lower - combined_result$PI_Lower) /
@@ -232,7 +232,7 @@ bayesian_statistical_intervals <- function(data,
       })
     }
 
-    # Recalculate reducible uncertainty after transformation
+    # Recalculate reducible imprecision after transformation
     combined_result$ReducibleUpper <- ((combined_result$TI_Upper - combined_result$PI_Upper) /
                                          (combined_result$TI_Upper - combined_result$Median))
     combined_result$ReducibleLower <- ((combined_result$TI_Lower - combined_result$PI_Lower) /

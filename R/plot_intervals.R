@@ -7,7 +7,7 @@
 #' of the original Shiny app and includes parameter information.
 #'
 #' @param result A list output from perform_calculations() containing data and summary
-#' @param show_reducible Logical, whether to show reducible uncertainty ribbons (default = FALSE)
+#' @param show_reducible Logical, whether to show reducible imprecision ribbons (default = FALSE)
 #' @param x_axis_title Character, custom title for x-axis (optional)
 #' @param show_summary Logical, whether to print the summary in the console (default = FALSE)
 #'
@@ -55,7 +55,7 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
                                           regexec("([0-9]+)% tolerance interval", summary_text))[[1]][2])
 
       if (pi_percent != ti_percent) {
-        stop("Reducible Uncertainty cannot be calculated between prediction and tolerance intervals of different quantiles. Please make sure the %PI and %TI you have requested in the previous function \"bayesian_statistical_intervals()\" match")
+        stop("Reducible imprecision cannot be calculated between prediction and tolerance intervals of different quantiles. Please make sure the %PI and %TI you have requested in the previous function \"bayesian_statistical_intervals()\" match")
       }
     }
   }
@@ -103,7 +103,7 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
   # Initialize plot
   p <- plot_ly()
 
-  # Add reducible uncertainty ribbons if enabled
+  # Add reducible imprecision ribbons if enabled
   if (show_reducible) {
     for (i in 1:nrow(data)) {
       by_val <- as.numeric(data$By[i])
@@ -114,7 +114,7 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
       reducible_upper_percent <- data$ReducibleUpper[i] * 100
       reducible_lower_percent <- data$ReducibleLower[i] * 100
 
-      # Add upper reducible uncertainty ribbon
+      # Add upper reducible imprecision ribbon
       p <- add_ribbons(p,
                        x = c(by_val - ribbon_width, by_val + ribbon_width),
                        ymin = rep(data$PI_Upper[i], 2),
@@ -128,7 +128,7 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
                                       by_label, reducible_upper_percent, data$PI_Upper[i], data$TI_Upper[i])
       )
 
-      # Add lower reducible uncertainty ribbon
+      # Add lower reducible imprecision ribbon
       p <- add_ribbons(p,
                        x = c(by_val - ribbon_width, by_val + ribbon_width),
                        ymin = rep(data$TI_Lower[i], 2),

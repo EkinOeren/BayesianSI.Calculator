@@ -54,7 +54,7 @@ the Krishnamoorthy method (default = FALSE)}
 \value{
 A list containing:
 \itemize{
-\item data: A data frame with calculated intervals and reducible uncertainty metrics
+\item data: A data frame with calculated intervals and reducible imprecision metrics
 \item summary: A string summarizing the calculation parameters
 \item krishnamoorthy_results: If use_krishnamoorthy=TRUE, a list of Krishnamoorthy method results
 }

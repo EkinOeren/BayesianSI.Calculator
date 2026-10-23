@@ -5,7 +5,7 @@
 #'
 #' @param data A data frame containing interval data with columns:
 #'        By, Median, CI_Lower, CI_Upper, PI_Lower, PI_Upper, TI_Lower, TI_Upper
-#' @param show_reducible Logical, whether to show reducible uncertainty ribbons (default = FALSE)
+#' @param show_reducible Logical, whether to show reducible imprecision ribbons (default = FALSE)
 #' @param log_normal Logical, whether values are in log-normal scale (default = FALSE)
 #' @param selected_by_values Optional vector of specific by values to include in the plot
 #'
@@ -91,7 +91,7 @@ plot_one_sided_intervals <- function(data, show_reducible = FALSE,
     by_val <- as.numeric(data$By[i])
     by_label <- as.character(data$By[i])
 
-    # Add reducible uncertainty ribbons if enabled
+    # Add reducible imprecision ribbons if enabled
     if (show_reducible) {
       ribbon_width <- 0.15
 
