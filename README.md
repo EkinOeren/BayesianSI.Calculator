@@ -63,7 +63,7 @@ print(result$data)
 The core function `bayesian_statistical_intervals()` computes three types of intervals from MCMC samples:
 
 - **Credible Intervals (CI)**: Bayesian confidence intervals for the median
-- **Prediction Intervals (PI)**: Intervals for future individual observations
+- **Prediction Intervals (PI)**: Intervals for future individual observations, computed as quantiles of the posterior predictive distribution (the average of the per-draw normal distribution functions)
 - **Tolerance Intervals (TI)**: Intervals containing a specified proportion of the population with given confidence
 - **Reducible imprecision**: the share of the tolerance-interval half-width that exceeds the prediction-interval half-width, i.e. the epistemic uncertainty that more data could reduce. It is returned as `ReducibleUpper = (TI_Upper - PI_Upper) / (TI_Upper - Median)` and `ReducibleLower = (TI_Lower - PI_Lower) / (TI_Lower - Median)`
 

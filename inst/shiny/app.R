@@ -1005,106 +1005,88 @@ server <- function(input, output, session) {
     return(as.data.frame(results))
   }
 
-  calculate_PI <- function(data, percent_for_pi, Eta = 0.001) {
+  # Kept in sync with R/calculate_pi.R (see tests/testthat/test-app-parity.R)
+  calculate_PI <- function(data, percent_for_pi, Eta = 1e-8) {
     # Check inputs
-    if (!is.data.frame(data) || !is.numeric(percent_for_pi) ||
-        percent_for_pi <= 0 || percent_for_pi >= 100) {
+    if (!is.data.frame(data) || !is.numeric(percent_for_pi) || length(percent_for_pi) != 1 ||
+        !is.finite(percent_for_pi) || percent_for_pi <= 0 || percent_for_pi >= 100) {
       stop("Invalid input parameters")
     }
+    if (!all(c("By", "mean", "variance") %in% names(data))) {
+      stop("'data' must contain the columns By, mean and variance")
+    }
+    if (!is.numeric(Eta) || length(Eta) != 1 || !is.finite(Eta) || Eta <= 0) {
+      stop("'Eta' must be a single positive number")
+    }
 
-    # Convert to data.table for faster processing
-    dt <- as.data.table(data)
+    # The two probabilities at which the limits are required
+    slice <- (1 - percent_for_pi / 100) / 2
+    probabilities <- c(slice, 1 - slice)
 
-    # Calculate PI_request1 and PI_request2
-    alpha <- 1 - percent_for_pi / 100
-    slice <- alpha / 2
-    PI_request1 <- slice
-    PI_request2 <- 1 - slice
-
-    # Vectorized bisection method
-    find_PI_vectorized <- function(PI_requests, means, sds) {
-      # Initialize result vector
-      results <- numeric(length(means))
-
-      # Set initial bounds to 99.99% and 0.001% of the distribution
-      ax_vector <- qnorm(0.0001, mean = means, sd = sds)
-      bx_vector <- qnorm(0.9999, mean = means, sd = sds)
-
-      # Check if PI_request is within the initial bounds
-      if (any(PI_requests < 0.0001) || any(PI_requests > 0.9999)) {
-        stop("PI request is outside the 99.99% - 0.001% range of the distribution")
-      }
-
-      # Pre-allocate vectors for efficiency
-      cx_vector <- numeric(length(means))
-      cy_vector <- numeric(length(means))
-      ay_vector <- numeric(length(means))
-      by_vector <- numeric(length(means))
-
-      # Perform bisection for each element
-      for (iteration in 1:500) {
-        # Calculate function values at bounds
-        ay_vector <- pnorm(ax_vector, mean = means, sd = sds) - PI_requests
-        by_vector <- pnorm(bx_vector, mean = means, sd = sds) - PI_requests
-
-        # Check convergence
-        if (all(abs(by_vector - ay_vector) < Eta)) {
-          break
+    # Bisection on  mean_m(Phi((x - mu_m) / sigma_m)) - p
+    find_PI_limits <- function(means, variances) {
+      sds <- sqrt(pmax(variances, 1e-12))
+      vapply(probabilities, function(p) {
+        per_draw <- stats::qnorm(p, mean = means, sd = sds)
+        lower <- min(per_draw)
+        upper <- max(per_draw)
+        initial_width <- upper - lower
+        # Precision is relative to the spread of the predictive distribution itself
+        # (average variance plus variance of the means), not to the size of the bracket
+        total_sd <- sqrt(mean(sds^2) + if (length(means) > 1) stats::var(means) else 0)
+        tolerance <- Eta * total_sd
+        if (initial_width == 0) {
+          return(lower)
         }
+        # Start from the quantile of the single averaged normal, which is close
+        x <- stats::qnorm(p, mean = mean(means), sd = sqrt(mean(sds^2)))
+        if (!is.finite(x) || x <= lower || x >= upper) {
+          x <- (lower + upper) / 2
+        }
+        for (iteration in seq_len(200)) {
+          # value of (average of the per-draw CDFs) - p, and its bracket update
+          value <- mean(stats::pnorm(x, mean = means, sd = sds)) - p
+          if (value < 0) {
+            lower <- x
+          } else {
+            upper <- x
+          }
+          if (upper - lower <= tolerance) {
+            break
+          }
+          # Newton step (the derivative is the average of the per-draw densities);
+          # whenever it leaves the bracket, bisect instead, so convergence is guaranteed
+          slope <- mean(stats::dnorm(x, mean = means, sd = sds))
+          step <- x - value / slope
+          if (!is.finite(step) || step <= lower || step >= upper) {
+            step <- (lower + upper) / 2
+          }
+          if (abs(step - x) <= tolerance) {
+            x <- step
+            break
+          }
+          x <- step
+        }
+        x
+      }, numeric(1))
+    }
 
-        # Calculate midpoints
-        cx_vector <- (ax_vector + bx_vector) / 2
-        cy_vector <- pnorm(cx_vector, mean = means, sd = sds) - PI_requests
-
-        # Update bounds
-        update_ax <- sign(cy_vector) == sign(ay_vector)
-        ax_vector[update_ax] <- cx_vector[update_ax]
-        bx_vector[!update_ax] <- cx_vector[!update_ax]
+    groups <- unique(data$By)
+    limits <- lapply(groups, function(group) {
+      rows <- which(data$By == group)
+      means <- as.numeric(data$mean[rows])
+      variances <- as.numeric(data$variance[rows])
+      if (anyNA(means) || anyNA(variances)) {
+        stop("'mean' and 'variance' must not contain missing values")
       }
+      find_PI_limits(means, variances)
+    })
 
-      # Return midpoint as result
-      return((ax_vector + bx_vector) / 2)
-    }
-
-    if (length(unique(dt$By)) == 1) {
-      # Single chain case - MODIFIED: Use mean instead of first row
-      selected_mean <- mean(dt$mean)  # Changed back to using mean
-      selected_sd <- sqrt(mean(dt$variance))  # Changed back to using mean
-
-      # Create vectors of the same length for vectorized calculation
-      means_vector <- rep(selected_mean, 2)
-      sds_vector <- rep(selected_sd, 2)
-      requests_vector <- c(PI_request1, PI_request2)
-      pi_values <- find_PI_vectorized(requests_vector, means_vector, sds_vector)
-
-      result_dt <- data.table(
-        By = unique(dt$By),
-        PI_Lower = pi_values[1],
-        PI_Upper = pi_values[2]
-      )
-    } else {
-      # Multiple groups case - MODIFIED: Use mean instead of first row
-      # Group by "By" column and calculate means
-      by_groups <- dt[, .(mean = mean(mean), variance = mean(variance)), by = By]
-
-      # Calculate PI for each group
-      pi_results <- by_groups[, {
-        selected_mean <- mean
-        selected_sd <- sqrt(variance)
-
-        # Create vectors for vectorized calculation
-        means_vector <- rep(selected_mean, 2)
-        sds_vector <- rep(selected_sd, 2)
-        requests_vector <- c(PI_request1, PI_request2)
-        pi_values <- find_PI_vectorized(requests_vector, means_vector, sds_vector)
-
-        .(PI_Lower = pi_values[1], PI_Upper = pi_values[2])
-      }, by = By]
-
-      result_dt <- pi_results
-    }
-
-    return(as.data.frame(result_dt))
+    data.frame(
+      By = groups,
+      PI_Lower = vapply(limits, function(x) x[1], numeric(1)),
+      PI_Upper = vapply(limits, function(x) x[2], numeric(1))
+    )
   }
 
   performCalculations <- function(switch_tab = FALSE) {
@@ -1143,8 +1125,7 @@ server <- function(input, output, session) {
       incProgress(0.2)
       pi_result <- calculate_PI(
         data = pred_dist,
-        percent_for_pi = input$percent_for_pi,
-        Eta = 0.001
+        percent_for_pi = input$percent_for_pi
       )
       print("PI calculation complete")
       print("PI result column names:")

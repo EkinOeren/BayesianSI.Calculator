@@ -90,8 +90,7 @@ perform_calculations <- function(data,
   # Calculate PI
   pi_result <- calculate_PI(
     data = pred_dist,
-    percent_for_pi = percent_for_pi,
-    Eta = 0.001
+    percent_for_pi = percent_for_pi
   )
 
   # Merge results

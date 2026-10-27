@@ -31,6 +31,7 @@ First CRAN release.
   `bslib` are now imported because the application needs them.
 * Inputs are validated with clear error messages: interval levels, the multiplication factor, covariate arguments, column types, and the `by` column. Missing or infinite MCMC draws and negative variances now stop with an error; previously missing draws were silently treated as zero.
 * The documentation cites Krishnamoorthy and Mathew (2009) for the tolerance interval methods.
+* Prediction intervals are now computed from the full posterior predictive distribution, the average of the per-draw normal distribution functions (manuscript Eq. 6-7), instead of one normal built from the averaged mean and variance. The new intervals are slightly wider when the draws disagree about the mean, i.e. in small samples; reducible imprecision changes accordingly. `calculate_PI()` uses a bracketed Newton-bisection search, and `Eta` is now a relative tolerance (default 1e-8) instead of a gap in probability.
 * The native pipe `|>` replaces `%>%`.
 * All examples are now runnable and use small synthetic data.
 * `start_app_view()` restores the `shiny.maxRequestSize` option when the

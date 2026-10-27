@@ -162,8 +162,7 @@ bayesian_statistical_intervals <- function(data,
   # Calculate PI
   pi_result <- calculate_PI(
     data = pred_dist,
-    percent_for_pi = prediction_interval_level,
-    Eta = 0.001
+    percent_for_pi = prediction_interval_level
   )
 
   # Merge results

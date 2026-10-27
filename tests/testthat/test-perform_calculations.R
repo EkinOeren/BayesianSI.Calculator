@@ -48,8 +48,11 @@ test_that("perform_calculations produces expected results with specific data", {
     Median = c(-0.7850, -0.8000, -0.7800),
     CI_Lower = c(-0.8165, -0.8910, -0.7800),
     CI_Upper = c(-0.7535, -0.6315, -0.7800),
-    PI_Lower = c(-2.8144, -2.7144, -2.8037),
-    PI_Upper = c(1.2444, 1.1324, 1.2437),
+    # PI limits are quantiles of the posterior predictive mixture (paper Eq. 6-7);
+    # checked against stats::uniroot. They were -2.8144, -2.7144, -2.8037 / 1.2444,
+    # 1.1324, 1.2437 when a single averaged normal was used.
+    PI_Lower = c(-2.8145, -2.7234, -2.8032),
+    PI_Upper = c(1.2439, 1.1318, 1.2432),
     TI_Lower = c(-2.8663, -2.8943, -2.8030),
     TI_Upper = c(1.2623, 1.2325, 1.2430)
   )
