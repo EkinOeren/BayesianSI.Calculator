@@ -97,8 +97,8 @@ calculate_predicted_distributions <- function(data, fixed_effects, random_params
     }
 
     # Validate that covariate values are numeric
-    if (!is.numeric(covariate_values)) {
-      stop("'covariate_values' must be numeric")
+    if (!is.numeric(covariate_values) || any(!is.finite(covariate_values))) {
+      stop("'covariate_values' must be numeric and finite")
     }
   }
 
@@ -276,13 +276,15 @@ calculate_predicted_distributions <- function(data, fixed_effects, random_params
     variance = variance_vector
   )
 
-  # Handle infinite values and round
+  # Round to 3 decimals. The inputs are validated to be finite, so every value is
+  # a finite number and the columns stay numeric.
   cols_to_process <- c("mean", "median", "lower_quantile", "upper_quantile", "variance")
   for(col in cols_to_process) {
-    PredictedDistributions_dt[[col]] <- sapply(PredictedDistributions_dt[[col]], function(x) {
-      if(is.infinite(x)) return(ifelse(x > 0, "+Inf", "-Inf"))
-      return(round(x, 3))
-    })
+    if (any(!is.finite(PredictedDistributions_dt[[col]]))) {
+      stop(sprintf("Non-finite values occurred in '%s'; check the scale of the inputs", col),
+           call. = FALSE)
+    }
+    PredictedDistributions_dt[[col]] <- round(PredictedDistributions_dt[[col]], 3)
   }
 
   # Sort by the "By" column

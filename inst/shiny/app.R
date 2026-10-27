@@ -109,6 +109,34 @@ check_variance <- function(variance_vector) {
   invisible(TRUE)
 }
 
+# Reducible imprecision helpers (copy of R/validate_inputs.R; keep in sync)
+reducible_ratio <- function(bound, pi, median_value, side, warn = TRUE) {
+  ratio <- (bound - pi) / (bound - median_value)
+  undefined <- is.finite(bound) & is.finite(pi) & is.finite(median_value) & !is.finite(ratio)
+  if (any(undefined)) {
+    ratio[undefined] <- NA_real_
+    if (warn) {
+      warning(sprintf(
+        "Reducible imprecision (%s) is not defined for %d group(s) because the tolerance bound equals the median; NA is returned",
+        side, sum(undefined)), call. = FALSE)
+    }
+  }
+  ratio
+}
+
+add_reducible_imprecision <- function(result, warn = TRUE, percent = FALSE) {
+  upper <- reducible_ratio(result$TI_Upper, result$PI_Upper, result$Median, "upper", warn)
+  lower <- reducible_ratio(result$TI_Lower, result$PI_Lower, result$Median, "lower", warn)
+  if (percent) {
+    result$ReducibleUpper <- round(upper * 100, 3)
+    result$ReducibleLower <- round(lower * 100, 3)
+  } else {
+    result$ReducibleUpper <- round(upper, 5)
+    result$ReducibleLower <- round(lower, 5)
+  }
+  result
+}
+
 ### UI ###
 ui <- fluidPage(
   theme = bs_theme(preset = "darkly"),
@@ -879,31 +907,15 @@ server <- function(input, output, session) {
       variance = variance_vector
     )
 
-    # Handle infinite values and round
-    PredictedDistributions_dt$mean <- sapply(PredictedDistributions_dt$mean, function(x) {
-      if(is.infinite(x)) return(ifelse(x > 0, "+Inf", "-Inf"))
-      return(round(x, 3))
-    })
-
-    PredictedDistributions_dt$median <- sapply(PredictedDistributions_dt$median, function(x) {
-      if(is.infinite(x)) return(ifelse(x > 0, "+Inf", "-Inf"))
-      return(round(x, 3))
-    })
-
-    PredictedDistributions_dt$lower_quantile <- sapply(PredictedDistributions_dt$lower_quantile, function(x) {
-      if(is.infinite(x)) return(ifelse(x > 0, "+Inf", "-Inf"))
-      return(round(x, 3))
-    })
-
-    PredictedDistributions_dt$upper_quantile <- sapply(PredictedDistributions_dt$upper_quantile, function(x) {
-      if(is.infinite(x)) return(ifelse(x > 0, "+Inf", "-Inf"))
-      return(round(x, 3))
-    })
-
-    PredictedDistributions_dt$variance <- sapply(PredictedDistributions_dt$variance, function(x) {
-      if(is.infinite(x)) return(ifelse(x > 0, "+Inf", "-Inf"))
-      return(round(x, 3))
-    })
+    # Round to 3 decimals. The inputs are validated to be finite, so every value is
+    # a finite number and the columns stay numeric.
+    for (col in c("mean", "median", "lower_quantile", "upper_quantile", "variance")) {
+      if (any(!is.finite(PredictedDistributions_dt[[col]]))) {
+        stop(sprintf("Non-finite values occurred in '%s'; check the scale of the inputs", col),
+             call. = FALSE)
+      }
+      PredictedDistributions_dt[[col]] <- round(PredictedDistributions_dt[[col]], 3)
+    }
 
     # Sort by the "By" column
     setorder(PredictedDistributions_dt, By)
@@ -1159,13 +1171,14 @@ server <- function(input, output, session) {
           ungroup()
       }
 
-      # Add the calculation for Reducible Uncertainty
-      combined_result$ReducibleUpper <- ((combined_result$TI_Upper - combined_result$PI_Upper)/(combined_result$TI_Upper - combined_result$Median))
-      combined_result$ReducibleLower <- ((combined_result$TI_Lower - combined_result$PI_Lower)/(combined_result$TI_Lower - combined_result$Median))
-
-      # Convert to percentages
-      combined_result$ReducibleUpper <- round(combined_result$ReducibleUpper * 100, 3)
-      combined_result$ReducibleLower <- round(combined_result$ReducibleLower * 100, 3)
+      # Add reducible imprecision as percentages (with a notification if it is not
+      # defined for a group). With log-normal data it is recalculated afterwards.
+      combined_result <- withCallingHandlers(
+        add_reducible_imprecision(combined_result, warn = !isTRUE(input$log_normal), percent = TRUE),
+        warning = function(w) {
+          showNotification(conditionMessage(w), type = "warning")
+          invokeRestart("muffleWarning")
+        })
 
       # Store the combined result
       IntervalsOutputInitial(combined_result)
@@ -1236,19 +1249,13 @@ server <- function(input, output, session) {
         mutate(across(c(Median, CI_Lower, CI_Upper, TI_Lower, TI_Upper, PI_Lower, PI_Upper), exp))
     }
 
-    # Add the calculation for Reducible Uncertainty
-    print("Calculating reducible imprecision values") # Debug print
-
-    data$ReducibleUpper <- ((data$TI_Upper - data$PI_Upper)/(data$TI_Upper - data$Median))
-    data$ReducibleLower <- ((data$TI_Lower - data$PI_Lower)/(data$TI_Lower - data$Median))
-
-    # Print some sample values
-    print("Sample reducible imprecision values:")
-    print(head(data[c("ReducibleUpper", "ReducibleLower")]))
-
-    # Convert to percentages
-    data$ReducibleUpper <- round(data$ReducibleUpper * 100, 3)
-    data$ReducibleLower <- round(data$ReducibleLower * 100, 3)
+    # Add reducible imprecision as percentages (notification if not defined)
+    data <- withCallingHandlers(
+      add_reducible_imprecision(data, percent = TRUE),
+      warning = function(w) {
+        showNotification(conditionMessage(w), type = "warning")
+        invokeRestart("muffleWarning")
+      })
 
     # Update the reactive values
     IntervalsOutputActual(data)

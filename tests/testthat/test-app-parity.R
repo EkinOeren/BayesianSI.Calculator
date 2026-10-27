@@ -64,7 +64,8 @@ test_that("the app defines the functions this test relies on", {
   expected <- c("calculate_ci", "calculate_tolerance_interval", "calculate_PI",
                 "calculate_gP_mean", "calculate_gamma_difference", "find_optimal_point",
                 "parse_x_value_input", "create_confidence_ellipse_points",
-                "check_positive", "check_draw_columns", "check_variance")
+                "check_positive", "check_draw_columns", "check_variance",
+                "reducible_ratio", "add_reducible_imprecision")
   expect_true(all(expected %in% names(app)),
               info = paste("missing in app.R:", paste(setdiff(expected, names(app)), collapse = ", ")))
   # same argument names as the package versions
@@ -144,4 +145,23 @@ test_that("app and package validate draws identically", {
   ok <- data.frame(x = c(1, 2, 3))
   expect_silent(app$check_draw_columns(ok, "x", "Fixed effect"))
   expect_silent(pkg_funs$check_draw_columns(ok, "x", "Fixed effect"))
+})
+
+test_that("app and package compute reducible imprecision identically, including the guard", {
+  app <- app_functions()
+  pkg_ns <- asNamespace(pkg)
+  df <- data.frame(Median = c(2, 2, 1), TI_Upper = c(5, 2, 4), PI_Upper = c(4, 1, 3),
+                   TI_Lower = c(-1, -1, -2), PI_Lower = c(0, 0, -1))
+
+  for (percent in c(FALSE, TRUE)) {
+    res_app <- suppressWarnings(app$add_reducible_imprecision(df, percent = percent))
+    res_pkg <- suppressWarnings(pkg_ns$add_reducible_imprecision(df, percent = percent))
+    expect_identical(res_app, res_pkg)
+  }
+
+  # both warn with the same text in the degenerate group (second row)
+  msg_app <- tryCatch(app$add_reducible_imprecision(df), warning = function(w) conditionMessage(w))
+  msg_pkg <- tryCatch(pkg_ns$add_reducible_imprecision(df), warning = function(w) conditionMessage(w))
+  expect_identical(msg_app, msg_pkg)
+  expect_match(msg_app, "not defined for 1 group")
 })

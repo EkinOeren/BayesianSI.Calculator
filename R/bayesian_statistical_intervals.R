@@ -125,9 +125,9 @@ bayesian_statistical_intervals <- function(data,
     }
   }
 
-  # Check if 'by' is not provided and print warning
+  # Tell the user when the default grouping is used (informational, not a problem)
   if (missing(by)) {
-    warning("As by value is not specified, default value \"Single Chain Dataset\" is used")
+    message("As by value is not specified, default value \"Single Chain Dataset\" is used")
   }
 
   # Calculate predicted distributions
@@ -168,23 +168,12 @@ bayesian_statistical_intervals <- function(data,
   # Merge results
   combined_result <- merge(merge(ci_result, ti_result, by = "By"), pi_result, by = "By")
 
-  # Ensure only one row per unique "By" value if there are duplicates
-  if (any(table(combined_result$By) > 1)) {
-    combined_result <- combined_result |>
-      dplyr::group_by(By) |>
-      dplyr::summarise(dplyr::across(dplyr::everything(), dplyr::first)) |>
-      dplyr::ungroup()
-  }
+  # Ensure only one row per unique "By" value; warn if rows had to be dropped
+  combined_result <- keep_first_by_row(combined_result)
 
-  # Add reducible imprecision calculations
-  combined_result$ReducibleUpper <- ((combined_result$TI_Upper - combined_result$PI_Upper) /
-                                       (combined_result$TI_Upper - combined_result$Median))
-  combined_result$ReducibleLower <- ((combined_result$TI_Lower - combined_result$PI_Lower) /
-                                       (combined_result$TI_Lower - combined_result$Median))
-
-  # Round to 5 decimal places
-  combined_result$ReducibleUpper <- round(combined_result$ReducibleUpper, 5)
-  combined_result$ReducibleLower <- round(combined_result$ReducibleLower, 5)
+  # Add reducible imprecision (rounded to 5 decimals). With log_normal = TRUE the
+  # ratio is recalculated on the original scale below, so do not warn twice.
+  combined_result <- add_reducible_imprecision(combined_result, warn = !log_normal)
 
   # Initialize Krishnamoorthy results
   krishnamoorthy_results <- NULL
@@ -232,12 +221,7 @@ bayesian_statistical_intervals <- function(data,
     }
 
     # Recalculate reducible imprecision after transformation
-    combined_result$ReducibleUpper <- ((combined_result$TI_Upper - combined_result$PI_Upper) /
-                                         (combined_result$TI_Upper - combined_result$Median))
-    combined_result$ReducibleLower <- ((combined_result$TI_Lower - combined_result$PI_Lower) /
-                                         (combined_result$TI_Lower - combined_result$Median))
-    combined_result$ReducibleUpper <- round(combined_result$ReducibleUpper, 5)
-    combined_result$ReducibleLower <- round(combined_result$ReducibleLower, 5)
+    combined_result <- add_reducible_imprecision(combined_result)
   }
 
   # Create formula string

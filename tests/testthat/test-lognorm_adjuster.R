@@ -88,7 +88,11 @@ test_that("lognorm_adjuster handles edge cases", {
     PI_Upper = 0.9
   )
 
-  # The function should handle this gracefully or produce Inf
-  result <- lognorm_adjuster(zero_denom, log_normal = FALSE)
-  expect_true(is.infinite(result$ReducibleUpper) || is.nan(result$ReducibleUpper))
+  # The ratio is not defined here (the tolerance bound equals the median): the
+  # function returns NA and says so, instead of silently returning Inf or NaN
+  expect_warning(result <- lognorm_adjuster(zero_denom, log_normal = FALSE),
+                 "not defined for 1 group")
+  expect_true(is.na(result$ReducibleUpper))
+  expect_false(is.nan(result$ReducibleUpper))
+  expect_false(is.infinite(result$ReducibleUpper))
 })

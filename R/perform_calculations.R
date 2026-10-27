@@ -104,15 +104,9 @@ perform_calculations <- function(data,
       dplyr::ungroup()
   }
 
-  # Add reducible imprecision calculations
-  combined_result$ReducibleUpper <- ((combined_result$TI_Upper - combined_result$PI_Upper) /
-                                       (combined_result$TI_Upper - combined_result$Median))
-  combined_result$ReducibleLower <- ((combined_result$TI_Lower - combined_result$PI_Lower) /
-                                       (combined_result$TI_Lower - combined_result$Median))
-
-  # Convert to percentages
-  combined_result$ReducibleUpper <- round(combined_result$ReducibleUpper * 100, 3)
-  combined_result$ReducibleLower <- round(combined_result$ReducibleLower * 100, 3)
+  # Add reducible imprecision as percentages (with log_normal = TRUE it is
+  # recalculated on the original scale below, so do not warn twice)
+  combined_result <- add_reducible_imprecision(combined_result, warn = !log_normal, percent = TRUE)
 
   # Apply log-normal transformation if requested
   if (log_normal) {
@@ -122,12 +116,7 @@ perform_calculations <- function(data,
     combined_result[log_cols] <- lapply(combined_result[log_cols], exp)
 
     # Recalculate reducible imprecision after transformation
-    combined_result$ReducibleUpper <- ((combined_result$TI_Upper - combined_result$PI_Upper) /
-                                         (combined_result$TI_Upper - combined_result$Median))
-    combined_result$ReducibleLower <- ((combined_result$TI_Lower - combined_result$PI_Lower) /
-                                         (combined_result$TI_Lower - combined_result$Median))
-    combined_result$ReducibleUpper <- round(combined_result$ReducibleUpper * 100, 3)
-    combined_result$ReducibleLower <- round(combined_result$ReducibleLower * 100, 3)
+    combined_result <- add_reducible_imprecision(combined_result, percent = TRUE)
   }
 
   # Create formula string

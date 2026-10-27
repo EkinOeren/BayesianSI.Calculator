@@ -34,13 +34,8 @@ lognorm_adjuster <- function(IntervalsOutputInitial, log_normal) {
                              TI_Lower, TI_Upper, PI_Lower, PI_Upper), exp))
   }
 
-  # Add the calculation for Reducible Imprecision
-  data$ReducibleUpper <- ((data$TI_Upper - data$PI_Upper)/(data$TI_Upper - data$Median))
-  data$ReducibleLower <- ((data$TI_Lower - data$PI_Lower)/(data$TI_Lower - data$Median))
-
-  # Convert to percentages
-  data$ReducibleUpper <- round(data$ReducibleUpper * 100, 3)
-  data$ReducibleLower <- round(data$ReducibleLower * 100, 3)
+  # Add reducible imprecision as percentages
+  data <- add_reducible_imprecision(data, percent = TRUE)
 
   return(data)
 }
