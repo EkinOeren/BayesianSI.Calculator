@@ -24,14 +24,15 @@ This function calculates the gP_mean value for each By group in the data,
 which is the average of the midpoints between lower and upper quantiles.
 }
 \examples{
-\dontrun{
 data <- data.frame(
   By = c("A", "A", "B", "B"),
   lower_quantile = c(-2, -1, -3, -2),
   upper_quantile = c(2, 3, 1, 2)
 )
-gP_mean <- calculate_gP_mean(data, 90)
-# Returns: c(A = 0.5, B = -0.5)
-}
+calculate_gP_mean(data, 90)
 
+}
+\references{
+Krishnamoorthy K, Mathew T (2009). \emph{Statistical Tolerance Regions: Theory,
+Applications, and Computation}. Wiley, Hoboken, NJ. \doi{10.1002/9780470473900}.
 }

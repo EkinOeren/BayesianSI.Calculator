@@ -1,24 +1,48 @@
-Package: BayesianStatisticalIntervalsCalculator
-Title: BSI is a Bayesian Statistical Analysis Tool
+Package: bayesintervals
+Title: Reducible Imprecision and Bayesian Intervals for Mixed Models
 Version: 2.0.0
-Authors@R: 
-    person("Ekin", "Ören", , "Ekin.Oren@Sanofi.com", role = c("aut", "cre"))
-Description: BSI is a Bayesian statistical analysis tool that calculates and visualizes statistical intervals and posterior predictive distributions from uploaded MCMC output data. Users select fixed effects and variance components, defining a Linear Mixed Model in order to generate credible, prediction, and tolerance intervals with adjustable confidence levels.
-License: License: Apache License (>= 2.0)
+Authors@R:
+    c(person("Ekin", "Ören", , "ekin.oren.3@gmail.com", role = c("aut", "cre")),
+      person("Sebastian", "Schmitz", role = "aut"),
+      person("Sanofi", role = c("cph", "fnd")))
+Description: Calculates and visualizes Bayesian credible, prediction and
+    tolerance intervals, and posterior predictive distributions, for linear
+    mixed models from Markov chain Monte Carlo (MCMC) samples of the model
+    parameters. Users define the model through fixed effects, variance
+    components and optional covariates, and results can be back-transformed
+    from the log scale. Tolerance intervals are derived from the posterior
+    predictive distribution following Krishnamoorthy and Mathew (2009)
+    <doi:10.1002/9780470473900>, including the construction of one-dimensional
+    two-sided intervals from the bivariate posterior of the lower and upper
+    quantiles. Reducible imprecision measures the share of the
+    tolerance-interval half-width that exceeds the prediction-interval
+    half-width, that is, the epistemic uncertainty that more data could
+    reduce. The package includes an interactive 'shiny' application, started
+    with start_app_view(), which has its own name: 'BSI' (Bayesian
+    Statistical Intervals). The development repository on 'GitHub' is called
+    'BayesianSI.Calculator'.
+License: Apache License (== 2.0)
+URL: https://github.com/Sanofi-Public/BayesianSI.Calculator
+BugReports: https://github.com/Sanofi-Public/BayesianSI.Calculator/issues
 Encoding: UTF-8
+Language: en-US
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
 Imports:
     shiny,
     DT,
     bslib,
+    later,
     dplyr,
     readr,
     data.table,
-    utf8,
     ggplot2,
-    grid,
     plotly,
-    stats
-Depends: 
+    stats,
+    utils,
+    grDevices
+Depends:
     R (>= 4.1.0)
+Suggests:
+    testthat
+LazyData: true
+Config/roxygen2/version: 8.1.1

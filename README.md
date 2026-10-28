@@ -1,8 +1,8 @@
-# BayesianStatisticalIntervalsCalculator  (BSI)
+# bayesintervals
 
 ## Overview
 
-BSI is a Bayesian statistical analysis tool designed for rapid calculation and visualization of statistical intervals from MCMC output data. It provides both an R package for programmatic access and a Shiny application for interactive analysis.
+**bayesintervals** is an R package for the rapid calculation and visualization of Bayesian statistical intervals from MCMC output data. It provides both R functions for programmatic access and a Shiny application for interactive analysis. Note that the package and the application have different names: the package is called `bayesintervals`, the application is called **BSI** (Bayesian Statistical Intervals) and is started with `start_app_view()`. The GitHub repository is named `BayesianSI.Calculator`.
 
 <img width="1833" height="779" alt="image" src="https://github.com/user-attachments/assets/94d58c42-2273-48ce-bf78-0587246ecce3" />
 
@@ -20,22 +20,23 @@ The package is not yet available on CRAN. You can install it from GitHub:
 
 ```r
 # install.packages("devtools")
-devtools::install_github("Sanofi-GitHub/BSI-APP/tree/master")
+devtools::install_github("Sanofi-Public/BayesianSI.Calculator")
 ```
 
 For access issues or questions about installation, please contact the development team or the maintainer:
-Ekin Ören (Ekin.Oeren@sanofi.com)
+Ekin Ören (ekin.oren.3@gmail.com)
 
 ## Quick Start
 
 ```r
-library(BayesianStatisticalIntervalsCalculator)
+library(bayesintervals)
 
 # Example MCMC data
 toy_data <- data.frame(
   EGTPTNUM = c(60, 60, 60, 60, 60, 90, 90, 90, 90, 90),
   s2 = c(74.18, 58.92, 75.04, 64.75, 67.81, 59.75, 51.91, 57.58, 64.76, 52.09),
   b2 = c(-5.23, -3.97, -2.92, -7.64, -2.57, 0.61, -2.02, -0.41, 0.08, 2.43),
+  b3 = c(6.85, 10.65, 10.78, 6.43, 8.96, 8.83, 4.37, 7.89, 9.38, 8.18),
   b4 = c(1.32, 3.68, 3.39, 3.13, 3.50, 5.57, 4.90, 1.71, 3.58, 3.36)
 )
 
@@ -62,8 +63,9 @@ print(result$data)
 The core function `bayesian_statistical_intervals()` computes three types of intervals from MCMC samples:
 
 - **Credible Intervals (CI)**: Bayesian confidence intervals for the median
-- **Prediction Intervals (PI)**: Intervals for future individual observations
+- **Prediction Intervals (PI)**: Intervals for future individual observations, computed as quantiles of the posterior predictive distribution (the average of the per-draw normal distribution functions)
 - **Tolerance Intervals (TI)**: Intervals containing a specified proportion of the population with given confidence
+- **Reducible imprecision**: the share of the tolerance-interval half-width that exceeds the prediction-interval half-width, i.e. the epistemic uncertainty that more data could reduce. It is returned as `ReducibleUpper = (TI_Upper - PI_Upper) / (TI_Upper - Median)` and `ReducibleLower = (TI_Lower - PI_Lower) / (TI_Lower - Median)`
 
 **Parameters:**
 
@@ -204,7 +206,7 @@ result <- bayesian_statistical_intervals(
 # Create one-sided plots
 one_sided_plots <- plot_one_sided_intervals(
   data = result$data,
-  show_reducible = TRUE  # Show reducible uncertainty
+  show_reducible = TRUE  # Show reducible imprecision
 )
 
 # Display plots
@@ -311,7 +313,7 @@ pp_plot_range <- plot_posterior_predictive(
 Here's a complete analysis workflow demonstrating multiple features:
 
 ```r
-library(BayesianStatisticalIntervalsCalculator)
+library(bayesintervals)
 
 # Step 1: Calculate all intervals with covariates and Krishnamoorthy method
 complete_result <- bayesian_statistical_intervals(
@@ -507,27 +509,31 @@ Where:
 
 ## Citation
 
-If you use this package in your research, please cite:
+If you use this package in your research, please cite the package and the
+methods it implements. Until the accompanying paper is published, cite the
+package as:
 
 ```
-Ören, E. (2024). BayesianStatisticalIntervalsCalculator: 
-Bayesian Statistical Intervals from MCMC Samples. 
-R package version 0.x.x.
+Ören E, Schmitz S (2026). bayesintervals: Reducible
+Imprecision and Bayesian Intervals for Mixed Models. R package version 2.0.0.
 ```
+
+Methods:
+
+- Krishnamoorthy K, Mathew T (2009). *Statistical Tolerance Regions: Theory,
+  Applications, and Computation*. Wiley, Hoboken, NJ.
+  [doi:10.1002/9780470473900](https://doi.org/10.1002/9780470473900).
+  The two-sided tolerance interval construction (`use_krishnamoorthy = TRUE`)
+  follows this book.
+- Wolfinger RD (1998). Tolerance intervals for variance component models using
+  Bayesian simulation. *Journal of Quality Technology*, 30(1).
 
 ## License
 
-This package is licensed under the [MIT License](LICENSE.md). Copyright © 2025 Sanofi. All rights reserved.
+This package is licensed under the [Apache License, Version 2.0](https://github.com/Sanofi-Public/BayesianSI.Calculator/blob/master/LICENSE.md). Copyright holder: Sanofi. See the [NOTICE](https://github.com/Sanofi-Public/BayesianSI.Calculator/blob/master/inst/NOTICE) file for attribution details.
 
 ## Contact
 
 For bug reports, feature requests, and other questions:
 - GitHub Issues: https://github.com/Sanofi-Public/BayesianSI.Calculator/issues
-- Maintainer: Sebastian Schmitz (sebastian.schmitz@sanofi.com)
-
----
-
-**Coming Soon:**
-
-- [Internal_BSI Shiny App]
-- [Technical Documentation]
+- Maintainer: Ekin Ören (ekin.oren.3@gmail.com)

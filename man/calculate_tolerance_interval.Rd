@@ -35,13 +35,12 @@ grouped by another column. Tolerance intervals contain a specified proportion of
 the population with a given confidence level.
 }
 \examples{
-\dontrun{
+set.seed(1)
 data <- data.frame(
   Group = rep(c("A", "B"), each = 50),
   lower_quantile = c(rnorm(50, 5, 1), rnorm(50, 10, 2)),
   upper_quantile = c(rnorm(50, 15, 1), rnorm(50, 20, 2))
 )
 calculate_tolerance_interval(data, "lower_quantile", "upper_quantile", 95, "Group")
-}
 
 }

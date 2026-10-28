@@ -22,34 +22,25 @@
 #' \item{variance}{Variance of random parameters}
 #'
 #' @examples
-#' \dontrun{
-#' data <- data.frame(
-#'   Group = rep(c("A", "B"), each = 5),
-#'   Fixed1 = c(1:5, 6:10),
-#'   Random1 = c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0),
-#'   Covariate1 = c(2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+#' set.seed(1)
+#' mcmc <- data.frame(
+#'   Group = rep(c("A", "B"), each = 50),
+#'   beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+#'   sigma2 = rgamma(100, shape = 20, rate = 10),
+#'   age = rnorm(100, 50, 5)
 #' )
 #'
-#' # Without covariates
-#' result1 <- calculate_predicted_distributions(
-#'   data,
-#'   fixed_effects = "Fixed1",
-#'   random_params = "Random1",
-#'   by = "Group",
-#'   tolerance_level = 95
+#' pred_dist <- calculate_predicted_distributions(
+#'   mcmc, fixed_effects = "beta", random_params = "sigma2",
+#'   by = "Group", tolerance_level = 90
 #' )
+#' head(pred_dist)
 #'
-#' # With covariates
-#' result2 <- calculate_predicted_distributions(
-#'   data,
-#'   fixed_effects = "Fixed1",
-#'   random_params = "Random1",
-#'   by = "Group",
-#'   tolerance_level = 95,
-#'   covariate_cols = "Covariate1",
-#'   covariate_values = 2.5
-#' )
-#' }
+#' # With a covariate scaled by 0.1
+#' calculate_predicted_distributions(
+#'   mcmc, fixed_effects = "beta", random_params = "sigma2", by = "Group",
+#'   tolerance_level = 90, covariate_cols = "age", covariate_values = 0.1
+#' ) |> head()
 #'
 #' @importFrom data.table as.data.table copy setorder
 #' @importFrom stats qnorm
@@ -80,9 +71,7 @@ calculate_predicted_distributions <- function(data, fixed_effects, random_params
     stop("'tolerance_level' must be a number between 0 and 100")
   }
 
-  if (!is.numeric(multiplication_factor)) {
-    stop("'multiplication_factor' must be a numeric value")
-  }
+  check_positive(multiplication_factor, "multiplication_factor")
 
   # Validate covariate inputs
   if (!is.null(covariate_cols)) {
@@ -108,8 +97,8 @@ calculate_predicted_distributions <- function(data, fixed_effects, random_params
     }
 
     # Validate that covariate values are numeric
-    if (!is.numeric(covariate_values)) {
-      stop("'covariate_values' must be numeric")
+    if (!is.numeric(covariate_values) || any(!is.finite(covariate_values))) {
+      stop("'covariate_values' must be numeric and finite")
     }
   }
 
@@ -154,6 +143,13 @@ calculate_predicted_distributions <- function(data, fixed_effects, random_params
 
   # Create a copy of the data to avoid modifying the original
   dt <- data.table::copy(data.table::as.data.table(data))
+
+  # Draws must be numeric and complete; NA or infinite draws would otherwise be
+  # silently treated as zero
+  check_draw_columns(dt, fixed_effects, "Fixed effect")
+  check_draw_columns(dt, random_params, "Variance component")
+  if (!is.null(covariate_cols)) check_draw_columns(dt, covariate_cols, "Covariate")
+  if (anyNA(dt[[by]])) stop(sprintf("By column '%s' contains missing values", by), call. = FALSE)
 
   vprint("\n=== Data Summary ===\n")
   vprint("Number of rows:", nrow(dt), "\n")
@@ -229,6 +225,7 @@ calculate_predicted_distributions <- function(data, fixed_effects, random_params
 
     # Calculate total variance
     variance_vector <- rowSums(random_matrix, na.rm = TRUE) * multiplication_factor
+    check_variance(variance_vector)
 
     vprint("Random parameters matrix (first few rows):\n")
     if (verbose) print(head(random_matrix))
@@ -279,13 +276,15 @@ calculate_predicted_distributions <- function(data, fixed_effects, random_params
     variance = variance_vector
   )
 
-  # Handle infinite values and round
+  # Round to 3 decimals. The inputs are validated to be finite, so every value is
+  # a finite number and the columns stay numeric.
   cols_to_process <- c("mean", "median", "lower_quantile", "upper_quantile", "variance")
   for(col in cols_to_process) {
-    PredictedDistributions_dt[[col]] <- sapply(PredictedDistributions_dt[[col]], function(x) {
-      if(is.infinite(x)) return(ifelse(x > 0, "+Inf", "-Inf"))
-      return(round(x, 3))
-    })
+    if (any(!is.finite(PredictedDistributions_dt[[col]]))) {
+      stop(sprintf("Non-finite values occurred in '%s'; check the scale of the inputs", col),
+           call. = FALSE)
+    }
+    PredictedDistributions_dt[[col]] <- round(PredictedDistributions_dt[[col]], 3)
   }
 
   # Sort by the "By" column

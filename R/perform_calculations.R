@@ -3,6 +3,14 @@
 #' This function coordinates the calculation of various statistical intervals including
 #' predicted distributions, confidence intervals, tolerance intervals, and prediction intervals.
 #'
+#' @section Relationship to \code{bayesian_statistical_intervals()}:
+#' \code{\link{bayesian_statistical_intervals}} is the main function of the package. It
+#' supports covariates, the Krishnamoorthy two-sided tolerance intervals and returns the
+#' predicted distributions. \code{perform_calculations()} is kept for backward
+#' compatibility; new code should use \code{bayesian_statistical_intervals()}. Note that
+#' this function reports reducible imprecision as a percentage, whereas
+#' \code{bayesian_statistical_intervals()} reports it as a fraction.
+#'
 #' @param data A data frame containing the input data
 #' @param fixed_effects Character vector of column names for fixed effects
 #' @param random_params Character vector of column names for random parameters
@@ -16,25 +24,24 @@
 #'
 #' @return A list containing:
 #' \itemize{
-#'   \item data: A data frame with calculated intervals and reducible uncertainty metrics
+#'   \item data: A data frame with calculated intervals and reducible imprecision metrics
 #'   \item summary: A string summarizing the calculation parameters
 #' }
 #'
 #' @examples
-#' \dontrun{
-#' data <- data.frame(
-#'   t1 = c(-0.82, -0.75, -0.79),
-#'   v1 = c(0.91, 0.88, 0.90),
-#'   By = c(1, 1, 2)
+#' set.seed(1)
+#' mcmc <- data.frame(
+#'   Group = rep(c("A", "B"), each = 50),
+#'   beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+#'   sigma2 = rgamma(100, shape = 20, rate = 10),
+#'   age = rnorm(100, 50, 5)
 #' )
-#' result <- perform_calculations(
-#'   data = data,
-#'   fixed_effects = "t1",
-#'   random_params = "v1",
-#'   by = "By",
-#'   tolerance_level = 90
+#'
+#' res <- perform_calculations(
+#'   mcmc, fixed_effects = "beta", random_params = "sigma2",
+#'   by = "Group", tolerance_level = 90
 #' )
-#' }
+#' res$data
 #'
 #' @export
 perform_calculations <- function(data,
@@ -83,8 +90,7 @@ perform_calculations <- function(data,
   # Calculate PI
   pi_result <- calculate_PI(
     data = pred_dist,
-    percent_for_pi = percent_for_pi,
-    Eta = 0.001
+    percent_for_pi = percent_for_pi
   )
 
   # Merge results
@@ -92,21 +98,15 @@ perform_calculations <- function(data,
 
   # Ensure only one row per unique "By" value if there are duplicates
   if (any(table(combined_result$By) > 1)) {
-    combined_result <- combined_result %>%
-      dplyr::group_by(By) %>%
-      dplyr::summarise(dplyr::across(dplyr::everything(), dplyr::first)) %>%
+    combined_result <- combined_result |>
+      dplyr::group_by(By) |>
+      dplyr::summarise(dplyr::across(dplyr::everything(), dplyr::first)) |>
       dplyr::ungroup()
   }
 
-  # Add reducible uncertainty calculations
-  combined_result$ReducibleUpper <- ((combined_result$TI_Upper - combined_result$PI_Upper) /
-                                       (combined_result$TI_Upper - combined_result$Median))
-  combined_result$ReducibleLower <- ((combined_result$TI_Lower - combined_result$PI_Lower) /
-                                       (combined_result$TI_Lower - combined_result$Median))
-
-  # Convert to percentages
-  combined_result$ReducibleUpper <- round(combined_result$ReducibleUpper * 100, 3)
-  combined_result$ReducibleLower <- round(combined_result$ReducibleLower * 100, 3)
+  # Add reducible imprecision as percentages (with log_normal = TRUE it is
+  # recalculated on the original scale below, so do not warn twice)
+  combined_result <- add_reducible_imprecision(combined_result, warn = !log_normal, percent = TRUE)
 
   # Apply log-normal transformation if requested
   if (log_normal) {
@@ -115,13 +115,8 @@ perform_calculations <- function(data,
                   "PI_Lower", "PI_Upper")
     combined_result[log_cols] <- lapply(combined_result[log_cols], exp)
 
-    # Recalculate reducible uncertainty after transformation
-    combined_result$ReducibleUpper <- ((combined_result$TI_Upper - combined_result$PI_Upper) /
-                                         (combined_result$TI_Upper - combined_result$Median))
-    combined_result$ReducibleLower <- ((combined_result$TI_Lower - combined_result$PI_Lower) /
-                                         (combined_result$TI_Lower - combined_result$Median))
-    combined_result$ReducibleUpper <- round(combined_result$ReducibleUpper * 100, 3)
-    combined_result$ReducibleLower <- round(combined_result$ReducibleLower * 100, 3)
+    # Recalculate reducible imprecision after transformation
+    combined_result <- add_reducible_imprecision(combined_result, percent = TRUE)
   }
 
   # Create formula string

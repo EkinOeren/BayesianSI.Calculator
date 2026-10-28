@@ -9,8 +9,15 @@ start_app_view(...)
 \arguments{
 \item{...}{arguments to pass to shiny::runApp}
 }
+\value{
+Called for its side effect of running the application; returns
+\code{NULL} invisibly when the application is closed.
+}
 \description{
-Launch the Shiny Application
+Starts the interactive application for uploading MCMC output and
+calculating and plotting statistical intervals. Uploads of up to 30 MB are
+accepted; the previous value of the \code{shiny.maxRequestSize} option is
+restored when the application is closed.
 }
 \examples{
 if(interactive()){

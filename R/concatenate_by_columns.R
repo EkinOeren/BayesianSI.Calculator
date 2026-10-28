@@ -9,21 +9,13 @@
 #' @return A data frame with the original data and a new column containing concatenated by values
 #'
 #' @examples
-#' \dontrun{
 #' data <- data.frame(
 #'   by1 = c(1, 1, 1, 2, 3, 3, 2),
 #'   by2 = c("orange", "orange", "apple", "apple", "apple", "apple", "apple"),
-#'   value = rnorm(7)
+#'   value = seq_len(7)
 #' )
-#'
-#' # Basic usage
-#' result <- concatenate_by_columns(data, by_columns = c("by1", "by2"))
-#'
-#' # With custom column name
-#' result <- concatenate_by_columns(data,
-#'                                 by_columns = c("by1", "by2"),
-#'                                 new_column_name = "my_by_column")
-#' }
+#' concatenate_by_columns(data, by_columns = c("by1", "by2"))
+#' concatenate_by_columns(data, by_columns = c("by1", "by2"), new_column_name = "my_by_column")
 #'
 #' @export
 concatenate_by_columns <- function(data, by_columns = NULL, new_column_name = "concatenated_by_column") {

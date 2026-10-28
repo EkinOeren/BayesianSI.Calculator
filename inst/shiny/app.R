@@ -1,4 +1,4 @@
-# Echo's Statsinator
+# Bayesian Statistical Intervals (BSI) Shiny application
 # This Shiny app allows users to upload CSV data, perform statistical calculations,
 # and visualize the results.
 
@@ -19,6 +19,7 @@
 
 ### SETUP ###
 library(shiny)
+library(bayesintervals)
 library(DT)
 library(bslib)
 library(dplyr)
@@ -26,11 +27,9 @@ library(dplyr)
 #for reading in large files
 library(readr)
 library(data.table)
-library(utf8)
 
 #for plotting needs
 library(ggplot2)
-library(grid)
 library(plotly)
 
 # Computes confidence ellipse coordinates from covariance and center without external dependencies.
@@ -68,6 +67,75 @@ create_confidence_ellipse_points <- function(cov_matrix,
   points
 }
 
+
+# Input checks. The package keeps an identical copy in R/validate_inputs.R so
+# that this application can run on its own; keep the two in sync.
+check_positive <- function(x, name) {
+  if (!is.numeric(x) || length(x) != 1 || !is.finite(x) || x <= 0) {
+    stop(sprintf("'%s' must be a single positive number", name), call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+check_draw_columns <- function(dt, cols, label) {
+  if (nrow(dt) == 0) {
+    stop("'data' has no rows", call. = FALSE)
+  }
+  for (col in cols) {
+    x <- dt[[col]]
+    if (!is.numeric(x)) {
+      converted <- suppressWarnings(as.numeric(as.character(x)))
+      if (any(is.na(converted) & !is.na(x))) {
+        stop(sprintf("%s column '%s' must be numeric but contains non-numeric values", label, col),
+             call. = FALSE)
+      }
+      x <- converted
+    }
+    bad <- which(!is.finite(x))
+    if (length(bad) > 0) {
+      stop(sprintf("%s column '%s' contains %d missing or non-finite value(s) (first at row %d)",
+                   label, col, length(bad), bad[1]), call. = FALSE)
+    }
+  }
+  invisible(TRUE)
+}
+
+check_variance <- function(variance_vector) {
+  neg <- which(variance_vector < 0)
+  if (length(neg) > 0) {
+    stop(sprintf("The variance components sum to a negative value in %d draw(s) (first at row %d); variances must be non-negative",
+                 length(neg), neg[1]), call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+# Reducible imprecision helpers (copy of R/validate_inputs.R; keep in sync)
+reducible_ratio <- function(bound, pi, median_value, side, warn = TRUE) {
+  ratio <- (bound - pi) / (bound - median_value)
+  undefined <- is.finite(bound) & is.finite(pi) & is.finite(median_value) & !is.finite(ratio)
+  if (any(undefined)) {
+    ratio[undefined] <- NA_real_
+    if (warn) {
+      warning(sprintf(
+        "Reducible imprecision (%s) is not defined for %d group(s) because the tolerance bound equals the median; NA is returned",
+        side, sum(undefined)), call. = FALSE)
+    }
+  }
+  ratio
+}
+
+add_reducible_imprecision <- function(result, warn = TRUE, percent = FALSE) {
+  upper <- reducible_ratio(result$TI_Upper, result$PI_Upper, result$Median, "upper", warn)
+  lower <- reducible_ratio(result$TI_Lower, result$PI_Lower, result$Median, "lower", warn)
+  if (percent) {
+    result$ReducibleUpper <- round(upper * 100, 3)
+    result$ReducibleLower <- round(lower * 100, 3)
+  } else {
+    result$ReducibleUpper <- round(upper, 5)
+    result$ReducibleLower <- round(lower, 5)
+  }
+  result
+}
 
 ### UI ###
 ui <- fluidPage(
@@ -265,17 +333,7 @@ ui <- fluidPage(
 
   div(
     style = "margin-bottom: 15px;",  # Add some space below the title section
-    h1("Bayesian Statistical Intervals (BSI)", style = "margin-bottom: 5px;"),  # Main title with reduced bottom margin
-    p(
-      style = "font-size: 0.9em; color: #ddd; margin-top: 0;",  # Smaller font, light color, no top margin
-      "Technical Guide: ",
-      a(
-        href = "https://r-connect-dev.prod.p488440267176.aws-emea.sanofi.com/content/44966b86-ac33-4d42-9db9-4e4f69a03835/Notebook3_DocumentationBSIApp_Version_0.2.html",
-        target = "_blank",
-        style = "color: #90EE90; text-decoration: underline;",
-        "LINK"
-      )
-    )
+    h1("Bayesian Statistical Intervals (BSI)", style = "margin-bottom: 5px;")  # Main title with reduced bottom margin
   ),
 
   sidebarLayout(
@@ -449,7 +507,6 @@ ui <- fluidPage(
 ### SERVER ###
 server <- function(input, output, session) {
 
-  options(shiny.maxRequestSize=30*1024^2)
 
   ### Variables
   InputData <- reactiveVal()
@@ -750,6 +807,19 @@ server <- function(input, output, session) {
     # Create a copy of the data to avoid modifying the original
     dt <- copy(as.data.table(InputData()))
 
+    # Draws must be numeric and complete; NA or infinite draws would otherwise be
+    # silently treated as zero. Errors are shown to the user through ErrorMessage.
+    check_positive(MultiplicationFactorVariances(), "Multiplication factor")
+    check_draw_columns(dt, FixedEffects, "Fixed effect")
+    check_draw_columns(dt, RandomParams, "Variance component")
+    for (k in 1:3) {
+      cov_col_k <- input[[paste0("covariate_", k)]]
+      if (!is.null(cov_col_k) && cov_col_k != "None" && cov_col_k %in% names(dt)) {
+        check_draw_columns(dt, cov_col_k, "Covariate")
+      }
+    }
+    if (anyNA(dt[[By]])) stop(sprintf("By column '%s' contains missing values", By), call. = FALSE)
+
     # Print column types for debugging
     print("Column types before processing:")
     for(col in c(FixedEffects, RandomParams)) {
@@ -807,6 +877,7 @@ server <- function(input, output, session) {
 
       # Calculate total variance
       variance_vector <- rowSums(random_matrix, na.rm = TRUE) * MultiplicationFactorVariances()
+      check_variance(variance_vector)
     } else {
       variance_vector <- rep(0, nrow(dt))
     }
@@ -836,31 +907,15 @@ server <- function(input, output, session) {
       variance = variance_vector
     )
 
-    # Handle infinite values and round
-    PredictedDistributions_dt$mean <- sapply(PredictedDistributions_dt$mean, function(x) {
-      if(is.infinite(x)) return(ifelse(x > 0, "+Inf", "-Inf"))
-      return(round(x, 3))
-    })
-
-    PredictedDistributions_dt$median <- sapply(PredictedDistributions_dt$median, function(x) {
-      if(is.infinite(x)) return(ifelse(x > 0, "+Inf", "-Inf"))
-      return(round(x, 3))
-    })
-
-    PredictedDistributions_dt$lower_quantile <- sapply(PredictedDistributions_dt$lower_quantile, function(x) {
-      if(is.infinite(x)) return(ifelse(x > 0, "+Inf", "-Inf"))
-      return(round(x, 3))
-    })
-
-    PredictedDistributions_dt$upper_quantile <- sapply(PredictedDistributions_dt$upper_quantile, function(x) {
-      if(is.infinite(x)) return(ifelse(x > 0, "+Inf", "-Inf"))
-      return(round(x, 3))
-    })
-
-    PredictedDistributions_dt$variance <- sapply(PredictedDistributions_dt$variance, function(x) {
-      if(is.infinite(x)) return(ifelse(x > 0, "+Inf", "-Inf"))
-      return(round(x, 3))
-    })
+    # Round to 3 decimals. The inputs are validated to be finite, so every value is
+    # a finite number and the columns stay numeric.
+    for (col in c("mean", "median", "lower_quantile", "upper_quantile", "variance")) {
+      if (any(!is.finite(PredictedDistributions_dt[[col]]))) {
+        stop(sprintf("Non-finite values occurred in '%s'; check the scale of the inputs", col),
+             call. = FALSE)
+      }
+      PredictedDistributions_dt[[col]] <- round(PredictedDistributions_dt[[col]], 3)
+    }
 
     # Sort by the "By" column
     setorder(PredictedDistributions_dt, By)
@@ -962,106 +1017,88 @@ server <- function(input, output, session) {
     return(as.data.frame(results))
   }
 
-  calculate_PI <- function(data, percent_for_pi, Eta = 0.001) {
+  # Kept in sync with R/calculate_pi.R (see tests/testthat/test-app-parity.R)
+  calculate_PI <- function(data, percent_for_pi, Eta = 1e-8) {
     # Check inputs
-    if (!is.data.frame(data) || !is.numeric(percent_for_pi) ||
-        percent_for_pi <= 0 || percent_for_pi >= 100) {
+    if (!is.data.frame(data) || !is.numeric(percent_for_pi) || length(percent_for_pi) != 1 ||
+        !is.finite(percent_for_pi) || percent_for_pi <= 0 || percent_for_pi >= 100) {
       stop("Invalid input parameters")
     }
+    if (!all(c("By", "mean", "variance") %in% names(data))) {
+      stop("'data' must contain the columns By, mean and variance")
+    }
+    if (!is.numeric(Eta) || length(Eta) != 1 || !is.finite(Eta) || Eta <= 0) {
+      stop("'Eta' must be a single positive number")
+    }
 
-    # Convert to data.table for faster processing
-    dt <- as.data.table(data)
+    # The two probabilities at which the limits are required
+    slice <- (1 - percent_for_pi / 100) / 2
+    probabilities <- c(slice, 1 - slice)
 
-    # Calculate PI_request1 and PI_request2
-    alpha <- 1 - percent_for_pi / 100
-    slice <- alpha / 2
-    PI_request1 <- slice
-    PI_request2 <- 1 - slice
-
-    # Vectorized bisection method
-    find_PI_vectorized <- function(PI_requests, means, sds) {
-      # Initialize result vector
-      results <- numeric(length(means))
-
-      # Set initial bounds to 99.99% and 0.001% of the distribution
-      ax_vector <- qnorm(0.0001, mean = means, sd = sds)
-      bx_vector <- qnorm(0.9999, mean = means, sd = sds)
-
-      # Check if PI_request is within the initial bounds
-      if (any(PI_requests < 0.0001) || any(PI_requests > 0.9999)) {
-        stop("PI request is outside the 99.99% - 0.001% range of the distribution")
-      }
-
-      # Pre-allocate vectors for efficiency
-      cx_vector <- numeric(length(means))
-      cy_vector <- numeric(length(means))
-      ay_vector <- numeric(length(means))
-      by_vector <- numeric(length(means))
-
-      # Perform bisection for each element
-      for (iteration in 1:500) {
-        # Calculate function values at bounds
-        ay_vector <- pnorm(ax_vector, mean = means, sd = sds) - PI_requests
-        by_vector <- pnorm(bx_vector, mean = means, sd = sds) - PI_requests
-
-        # Check convergence
-        if (all(abs(by_vector - ay_vector) < Eta)) {
-          break
+    # Bisection on  mean_m(Phi((x - mu_m) / sigma_m)) - p
+    find_PI_limits <- function(means, variances) {
+      sds <- sqrt(pmax(variances, 1e-12))
+      vapply(probabilities, function(p) {
+        per_draw <- stats::qnorm(p, mean = means, sd = sds)
+        lower <- min(per_draw)
+        upper <- max(per_draw)
+        initial_width <- upper - lower
+        # Precision is relative to the spread of the predictive distribution itself
+        # (average variance plus variance of the means), not to the size of the bracket
+        total_sd <- sqrt(mean(sds^2) + if (length(means) > 1) stats::var(means) else 0)
+        tolerance <- Eta * total_sd
+        if (initial_width == 0) {
+          return(lower)
         }
+        # Start from the quantile of the single averaged normal, which is close
+        x <- stats::qnorm(p, mean = mean(means), sd = sqrt(mean(sds^2)))
+        if (!is.finite(x) || x <= lower || x >= upper) {
+          x <- (lower + upper) / 2
+        }
+        for (iteration in seq_len(200)) {
+          # value of (average of the per-draw CDFs) - p, and its bracket update
+          value <- mean(stats::pnorm(x, mean = means, sd = sds)) - p
+          if (value < 0) {
+            lower <- x
+          } else {
+            upper <- x
+          }
+          if (upper - lower <= tolerance) {
+            break
+          }
+          # Newton step (the derivative is the average of the per-draw densities);
+          # whenever it leaves the bracket, bisect instead, so convergence is guaranteed
+          slope <- mean(stats::dnorm(x, mean = means, sd = sds))
+          step <- x - value / slope
+          if (!is.finite(step) || step <= lower || step >= upper) {
+            step <- (lower + upper) / 2
+          }
+          if (abs(step - x) <= tolerance) {
+            x <- step
+            break
+          }
+          x <- step
+        }
+        x
+      }, numeric(1))
+    }
 
-        # Calculate midpoints
-        cx_vector <- (ax_vector + bx_vector) / 2
-        cy_vector <- pnorm(cx_vector, mean = means, sd = sds) - PI_requests
-
-        # Update bounds
-        update_ax <- sign(cy_vector) == sign(ay_vector)
-        ax_vector[update_ax] <- cx_vector[update_ax]
-        bx_vector[!update_ax] <- cx_vector[!update_ax]
+    groups <- unique(data$By)
+    limits <- lapply(groups, function(group) {
+      rows <- which(data$By == group)
+      means <- as.numeric(data$mean[rows])
+      variances <- as.numeric(data$variance[rows])
+      if (anyNA(means) || anyNA(variances)) {
+        stop("'mean' and 'variance' must not contain missing values")
       }
+      find_PI_limits(means, variances)
+    })
 
-      # Return midpoint as result
-      return((ax_vector + bx_vector) / 2)
-    }
-
-    if (length(unique(dt$By)) == 1) {
-      # Single chain case - MODIFIED: Use mean instead of first row
-      selected_mean <- mean(dt$mean)  # Changed back to using mean
-      selected_sd <- sqrt(mean(dt$variance))  # Changed back to using mean
-
-      # Create vectors of the same length for vectorized calculation
-      means_vector <- rep(selected_mean, 2)
-      sds_vector <- rep(selected_sd, 2)
-      requests_vector <- c(PI_request1, PI_request2)
-      pi_values <- find_PI_vectorized(requests_vector, means_vector, sds_vector)
-
-      result_dt <- data.table(
-        By = unique(dt$By),
-        PI_Lower = pi_values[1],
-        PI_Upper = pi_values[2]
-      )
-    } else {
-      # Multiple groups case - MODIFIED: Use mean instead of first row
-      # Group by "By" column and calculate means
-      by_groups <- dt[, .(mean = mean(mean), variance = mean(variance)), by = By]
-
-      # Calculate PI for each group
-      pi_results <- by_groups[, {
-        selected_mean <- mean
-        selected_sd <- sqrt(variance)
-
-        # Create vectors for vectorized calculation
-        means_vector <- rep(selected_mean, 2)
-        sds_vector <- rep(selected_sd, 2)
-        requests_vector <- c(PI_request1, PI_request2)
-        pi_values <- find_PI_vectorized(requests_vector, means_vector, sds_vector)
-
-        .(PI_Lower = pi_values[1], PI_Upper = pi_values[2])
-      }, by = By]
-
-      result_dt <- pi_results
-    }
-
-    return(as.data.frame(result_dt))
+    data.frame(
+      By = groups,
+      PI_Lower = vapply(limits, function(x) x[1], numeric(1)),
+      PI_Upper = vapply(limits, function(x) x[2], numeric(1))
+    )
   }
 
   performCalculations <- function(switch_tab = FALSE) {
@@ -1100,8 +1137,7 @@ server <- function(input, output, session) {
       incProgress(0.2)
       pi_result <- calculate_PI(
         data = pred_dist,
-        percent_for_pi = input$percent_for_pi,
-        Eta = 0.001
+        percent_for_pi = input$percent_for_pi
       )
       print("PI calculation complete")
       print("PI result column names:")
@@ -1135,13 +1171,14 @@ server <- function(input, output, session) {
           ungroup()
       }
 
-      # Add the calculation for Reducible Uncertainty
-      combined_result$ReducibleUpper <- ((combined_result$TI_Upper - combined_result$PI_Upper)/(combined_result$TI_Upper - combined_result$Median))
-      combined_result$ReducibleLower <- ((combined_result$TI_Lower - combined_result$PI_Lower)/(combined_result$TI_Lower - combined_result$Median))
-
-      # Convert to percentages
-      combined_result$ReducibleUpper <- round(combined_result$ReducibleUpper * 100, 3)
-      combined_result$ReducibleLower <- round(combined_result$ReducibleLower * 100, 3)
+      # Add reducible imprecision as percentages (with a notification if it is not
+      # defined for a group). With log-normal data it is recalculated afterwards.
+      combined_result <- withCallingHandlers(
+        add_reducible_imprecision(combined_result, warn = !isTRUE(input$log_normal), percent = TRUE),
+        warning = function(w) {
+          showNotification(conditionMessage(w), type = "warning")
+          invokeRestart("muffleWarning")
+        })
 
       # Store the combined result
       IntervalsOutputInitial(combined_result)
@@ -1212,19 +1249,13 @@ server <- function(input, output, session) {
         mutate(across(c(Median, CI_Lower, CI_Upper, TI_Lower, TI_Upper, PI_Lower, PI_Upper), exp))
     }
 
-    # Add the calculation for Reducible Uncertainty
-    print("Calculating reducible imprecision values") # Debug print
-
-    data$ReducibleUpper <- ((data$TI_Upper - data$PI_Upper)/(data$TI_Upper - data$Median))
-    data$ReducibleLower <- ((data$TI_Lower - data$PI_Lower)/(data$TI_Lower - data$Median))
-
-    # Print some sample values
-    print("Sample reducible imprecision values:")
-    print(head(data[c("ReducibleUpper", "ReducibleLower")]))
-
-    # Convert to percentages
-    data$ReducibleUpper <- round(data$ReducibleUpper * 100, 3)
-    data$ReducibleLower <- round(data$ReducibleLower * 100, 3)
+    # Add reducible imprecision as percentages (notification if not defined)
+    data <- withCallingHandlers(
+      add_reducible_imprecision(data, percent = TRUE),
+      warning = function(w) {
+        showNotification(conditionMessage(w), type = "warning")
+        invokeRestart("muffleWarning")
+      })
 
     # Update the reactive values
     IntervalsOutputActual(data)

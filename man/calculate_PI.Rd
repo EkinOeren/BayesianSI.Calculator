@@ -4,41 +4,49 @@
 \alias{calculate_PI}
 \title{Calculate Prediction Intervals}
 \usage{
-calculate_PI(data, percent_for_pi, Eta = 0.001)
+calculate_PI(data, percent_for_pi, Eta = 1e-08)
 }
 \arguments{
 \item{data}{A data frame or data.table containing at least the following columns:
-\itemize{
-\item By: A grouping variable
-\item mean: The mean of each group
-\item variance: The variance of each group
+\describe{
+\item{By}{A grouping variable}
+\item{mean}{The mean of the normal distribution of each draw}
+\item{variance}{The variance of the normal distribution of each draw}
 }}
 
 \item{percent_for_pi}{The desired prediction interval percentage (between 0 and 100)}
 
-\item{Eta}{Convergence criterion for the bisection method (default = 0.001)}
+\item{Eta}{Relative convergence tolerance: the search stops when the bracket,
+or a Newton step, is smaller than \code{Eta} times the standard deviation
+of the predictive distribution (default = 1e-8).}
 }
 \value{
 A data frame with the following columns:
-\itemize{
-\item By: The grouping variable
-\item PI_Lower: Lower bound of the prediction interval
-\item PI_Upper: Upper bound of the prediction interval
+\describe{
+\item{By}{The grouping variable}
+\item{PI_Lower}{Lower bound of the prediction interval}
+\item{PI_Upper}{Upper bound of the prediction interval}
 }
 }
 \description{
-This function calculates prediction intervals using a vectorized bisection method
-for finding quantiles of normal distributions. It works with both single and
-multiple groups of data.
+Calculates Bayesian prediction intervals from MCMC draws. Every draw \eqn{m}
+defines a normal distribution with mean \eqn{\mu_m} and variance
+\eqn{\sigma^2_m}. The posterior predictive distribution of a future
+observation is approximated by the average of these distribution functions,
+\deqn{\tilde p(x) = \frac{1}{M} \sum_{m=1}^{M} \Phi\left(\frac{x - \mu_m}{\sigma_m}\right),}
+and the limits of a two-sided \eqn{P}\\% prediction interval are the
+\eqn{(1-P)/2} and \eqn{(1+P)/2} quantiles of \eqn{\tilde p}. The quantiles
+are found numerically: a bisection that is accelerated by Newton steps
+whenever they stay inside the bracket. The bracket [smallest, largest] of the per-draw
+quantiles always contains the quantile of the average, so the sign of
+\eqn{\tilde p(x) - p} is guaranteed to differ at the two starting points.
 }
 \examples{
-\dontrun{
 data <- data.frame(
   By = c("A", "A", "B", "B"),
   mean = c(10, 11, 20, 21),
   variance = c(2, 2.1, 3, 3.1)
 )
-result <- calculate_PI(data, percent_for_pi = 95)
-}
+calculate_PI(data, percent_for_pi = 95)
 
 }

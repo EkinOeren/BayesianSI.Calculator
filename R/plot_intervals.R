@@ -7,29 +7,27 @@
 #' of the original Shiny app and includes parameter information.
 #'
 #' @param result A list output from perform_calculations() containing data and summary
-#' @param show_reducible Logical, whether to show reducible uncertainty ribbons (default = FALSE)
+#' @param show_reducible Logical, whether to show reducible imprecision ribbons (default = FALSE)
 #' @param x_axis_title Character, custom title for x-axis (optional)
 #' @param show_summary Logical, whether to print the summary in the console (default = FALSE)
 #'
 #' @return A plotly object displaying the statistical intervals
 #'
 #' @examples
-#' \dontrun{
-#' data <- data.frame(
-#'   t1 = c(-0.82, -0.75, -0.79),
-#'   v1 = c(0.91, 0.88, 0.90),
-#'   By = c(1, 1, 2)
+#' set.seed(1)
+#' mcmc <- data.frame(
+#'   Group = rep(c("A", "B"), each = 50),
+#'   beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+#'   sigma2 = rgamma(100, shape = 20, rate = 10),
+#'   age = rnorm(100, 50, 5)
 #' )
-#' calc_result <- perform_calculations(
-#'   data = data,
-#'   fixed_effects = "t1",
-#'   random_params = "v1",
-#'   by = "By",
-#'   tolerance_level = 90
+#'
+#' res <- perform_calculations(
+#'   mcmc, fixed_effects = "beta", random_params = "sigma2",
+#'   by = "Group", tolerance_level = 90
 #' )
-#' plot_intervals(calc_result)
-#' plot_intervals(calc_result, show_summary = TRUE)
-#' }
+#' p <- plot_intervals(res)
+#' p2 <- plot_intervals(res, show_summary = TRUE)
 #'
 #' @export
 plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
@@ -57,7 +55,7 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
                                           regexec("([0-9]+)% tolerance interval", summary_text))[[1]][2])
 
       if (pi_percent != ti_percent) {
-        stop("Reducible Uncertainty cannot be calculated between prediction and tolerance intervals of different quantiles. Please make sure the %PI and %TI you have requested in the previous function \"bayesian_statistical_intervals()\" match")
+        stop("Reducible imprecision cannot be calculated between prediction and tolerance intervals of different quantiles. Please make sure the %PI and %TI you have requested in the previous function \"bayesian_statistical_intervals()\" match")
       }
     }
   }
@@ -105,7 +103,7 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
   # Initialize plot
   p <- plot_ly()
 
-  # Add reducible uncertainty ribbons if enabled
+  # Add reducible imprecision ribbons if enabled
   if (show_reducible) {
     for (i in 1:nrow(data)) {
       by_val <- as.numeric(data$By[i])
@@ -116,7 +114,7 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
       reducible_upper_percent <- data$ReducibleUpper[i] * 100
       reducible_lower_percent <- data$ReducibleLower[i] * 100
 
-      # Add upper reducible uncertainty ribbon
+      # Add upper reducible imprecision ribbon
       p <- add_ribbons(p,
                        x = c(by_val - ribbon_width, by_val + ribbon_width),
                        ymin = rep(data$PI_Upper[i], 2),
@@ -130,7 +128,7 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
                                       by_label, reducible_upper_percent, data$PI_Upper[i], data$TI_Upper[i])
       )
 
-      # Add lower reducible uncertainty ribbon
+      # Add lower reducible imprecision ribbon
       p <- add_ribbons(p,
                        x = c(by_val - ribbon_width, by_val + ribbon_width),
                        ymin = rep(data$TI_Lower[i], 2),
@@ -161,20 +159,20 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
                       hoverinfo = "text",
                       text = sprintf("CI<br>By: %s<br>Lower: %.4f<br>Upper: %.4f<br>Median: %.4f",
                                      by_label, data$CI_Lower[i], data$CI_Upper[i], data$Median[i])
-    ) %>%
+    ) |>
       # Add CI caps
       add_segments(
         x = by_val - offset_scale - cap_width, y = data$CI_Lower[i],
         xend = by_val - offset_scale + cap_width, yend = data$CI_Lower[i],
         line = list(color = '#de2f2f', width = 1.5),
         showlegend = FALSE
-      ) %>%
+      ) |>
       add_segments(
         x = by_val - offset_scale - cap_width, y = data$CI_Upper[i],
         xend = by_val - offset_scale + cap_width, yend = data$CI_Upper[i],
         line = list(color = '#de2f2f', width = 1.5),
         showlegend = FALSE
-      ) %>%
+      ) |>
       # Add CI median point
       add_markers(
         x = by_val - offset_scale, y = data$Median[i],
@@ -192,20 +190,20 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
                       hoverinfo = "text",
                       text = sprintf("PI<br>By: %s<br>Lower: %.4f<br>Upper: %.4f<br>Median: %.4f",
                                      by_label, data$PI_Lower[i], data$PI_Upper[i], data$Median[i])
-    ) %>%
+    ) |>
       # Add PI caps
       add_segments(
         x = by_val - cap_width, y = data$PI_Lower[i],
         xend = by_val + cap_width, yend = data$PI_Lower[i],
         line = list(color = '#006400', width = 1.5),
         showlegend = FALSE
-      ) %>%
+      ) |>
       add_segments(
         x = by_val - cap_width, y = data$PI_Upper[i],
         xend = by_val + cap_width, yend = data$PI_Upper[i],
         line = list(color = '#006400', width = 1.5),
         showlegend = FALSE
-      ) %>%
+      ) |>
       # Add PI median point
       add_markers(
         x = by_val, y = data$Median[i],
@@ -223,20 +221,20 @@ plot_intervals <- function(result, show_reducible = FALSE, x_axis_title = NULL,
                       hoverinfo = "text",
                       text = sprintf("TI<br>By: %s<br>Lower: %.4f<br>Upper: %.4f<br>Median: %.4f",
                                      by_label, data$TI_Lower[i], data$TI_Upper[i], data$Median[i])
-    ) %>%
+    ) |>
       # Add TI caps
       add_segments(
         x = by_val + offset_scale - cap_width, y = data$TI_Lower[i],
         xend = by_val + offset_scale + cap_width, yend = data$TI_Lower[i],
         line = list(color = '#4232e7', width = 1.5),
         showlegend = FALSE
-      ) %>%
+      ) |>
       add_segments(
         x = by_val + offset_scale - cap_width, y = data$TI_Upper[i],
         xend = by_val + offset_scale + cap_width, yend = data$TI_Upper[i],
         line = list(color = '#4232e7', width = 1.5),
         showlegend = FALSE
-      ) %>%
+      ) |>
       # Add TI median point
       add_markers(
         x = by_val + offset_scale, y = data$Median[i],

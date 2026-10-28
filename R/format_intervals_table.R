@@ -4,10 +4,25 @@
 #' in the same format as the Shiny app.
 #'
 #' @param result Output list from perform_calculations() containing data and summary
-#' @param show_reducible Logical, whether to include reducible uncertainty columns (default = FALSE)
+#' @param show_reducible Logical, whether to include reducible imprecision columns (default = FALSE)
 #'
 #' @return A DT::datatable object with formatted headers showing interval percentages
 #' @import DT
+#' @examples
+#' set.seed(1)
+#' mcmc <- data.frame(
+#'   Group = rep(c("A", "B"), each = 50),
+#'   beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+#'   sigma2 = rgamma(100, shape = 20, rate = 10),
+#'   age = rnorm(100, 50, 5)
+#' )
+#'
+#' res <- perform_calculations(
+#'   mcmc, fixed_effects = "beta", random_params = "sigma2",
+#'   by = "Group", tolerance_level = 90
+#' )
+#' tbl <- format_intervals_table(res)
+#'
 #' @export
 format_intervals_table <- function(result, show_reducible = FALSE) {
 
@@ -16,10 +31,13 @@ format_intervals_table <- function(result, show_reducible = FALSE) {
   summary_text <- result$summary
 
   # Extract percentages from summary text using regex
-  ci_percent <- as.numeric(regmatches(summary_text, regexpr("\\d+(?=% credibility)", summary_text, perl = TRUE)))
+  # Both pipelines are supported: bayesian_statistical_intervals() writes
+  # "credible interval" / "credibility of tolerance", perform_calculations()
+  # writes "credibility interval" / "confidence of tolerance".
+  ci_percent <- as.numeric(regmatches(summary_text, regexpr("\\d+(?=% credib(?:le|ility) interval)", summary_text, perl = TRUE)))
   pi_percent <- as.numeric(regmatches(summary_text, regexpr("\\d+(?=% prediction)", summary_text, perl = TRUE)))
   ti_percent <- as.numeric(regmatches(summary_text, regexpr("\\d+(?=% tolerance)", summary_text, perl = TRUE)))
-  conf_percent <- as.numeric(regmatches(summary_text, regexpr("\\d+(?=% confidence)", summary_text, perl = TRUE)))
+  conf_percent <- as.numeric(regmatches(summary_text, regexpr("\\d+(?=% (?:confidence|credibility) of tolerance)", summary_text, perl = TRUE)))
 
   # Check if single chain
   is_single_chain <- length(unique(data$By)) == 1 &&
@@ -141,7 +159,7 @@ format_intervals_table <- function(result, show_reducible = FALSE) {
     style = 'bootstrap4',
     container = container,
     rownames = FALSE
-  ) %>%
+  ) |>
     DT::formatRound(columns = setdiff(display_columns, "By"), digits = 4)
 
   return(dt)

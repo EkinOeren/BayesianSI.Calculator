@@ -17,19 +17,17 @@
 #'   \item K_TI_Upper: Krishnamoorthy upper tolerance interval bound
 #' }
 #'
+#' @references
+#' Krishnamoorthy K, Mathew T (2009). \emph{Statistical Tolerance Regions: Theory,
+#' Applications, and Computation}. Wiley, Hoboken, NJ. \doi{10.1002/9780470473900}.
+#'
 #' @examples
-#' \dontrun{
-#' data <- data.frame(
-#'   By = c("A", "B"),
-#'   TI_Lower = c(-3, -4),
-#'   TI_Upper = c(3, 4)
-#' )
+#' data <- data.frame(By = c("A", "B"), TI_Lower = c(-3, -4), TI_Upper = c(3, 4))
 #' optimal_results <- list(
 #'   A = list(By = "A", g1 = -2.5, g2 = 2.5),
 #'   B = list(By = "B", g1 = -3.5, g2 = 3.5)
 #' )
-#' updated_data <- add_krishnamoorthy_ti(data, optimal_results)
-#' }
+#' add_krishnamoorthy_ti(data, optimal_results)
 #'
 #' @export
 add_krishnamoorthy_ti <- function(data, optimal_results) {

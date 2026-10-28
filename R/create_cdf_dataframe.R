@@ -10,10 +10,12 @@
 #' @param log_normal Logical, whether to use log-normal transformation (default = FALSE)
 #'
 #' @return A dataframe containing:
-#' \itemize{
+#' \describe{
 #'   \item{x}{Numeric vector of x values (transformed if log_normal = TRUE)}
 #'   \item{x_log}{Numeric vector of x values in log space}
-#'   \item{y_mean}{Numeric vector of mean CDF values}
+#'   \item{y_mean}{Numeric vector with the median, over the MCMC draws, of the
+#'     distribution functions at each x value (the column name is kept for
+#'     compatibility)}
 #'   \item{ci_lower}{Numeric vector of lower confidence interval bounds}
 #'   \item{ci_upper}{Numeric vector of upper confidence interval bounds}
 #'   \item{by_value}{Character or numeric, the by-value being processed}
@@ -21,15 +23,20 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
-#' # Single chain example
-#' pred_dist <- calculate_predicted_distributions(data, "fixed1", "random1",
-#'                                              "Single Chain Dataset", 95)
-#' cdf_data <- create_cdf_dataframe(pred_dist, by_value = "Single Chain")
+#' set.seed(1)
+#' mcmc <- data.frame(
+#'   Group = rep(c("A", "B"), each = 50),
+#'   beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+#'   sigma2 = rgamma(100, shape = 20, rate = 10),
+#'   age = rnorm(100, 50, 5)
+#' )
 #'
-#' # Multiple chain example
-#' cdf_data_A <- create_cdf_dataframe(pred_dist, by_value = "A")
-#' }
+#' pred_dist <- calculate_predicted_distributions(
+#'   mcmc, fixed_effects = "beta", random_params = "sigma2",
+#'   by = "Group", tolerance_level = 90
+#' )
+#' cdf_data <- create_cdf_dataframe(pred_dist, by_value = "A")
+#' head(cdf_data)
 #'
 #' @importFrom stats qnorm pnorm quantile
 #' @export

@@ -28,16 +28,26 @@
 #'   \item iterations: Number of iterations used
 #' }
 #'
+#' @references
+#' Krishnamoorthy K, Mathew T (2009). \emph{Statistical Tolerance Regions: Theory,
+#' Applications, and Computation}. Wiley, Hoboken, NJ. \doi{10.1002/9780470473900}.
+#'
 #' @examples
-#' \dontrun{
-#' data <- data.frame(
-#'   By = c("A", "A", "A", "A", "B", "B", "B", "B"),
-#'   lower_quantile = c(-2, -1, -3, -2, -4, -3, -5, -4),
-#'   upper_quantile = c(2, 3, 1, 2, 4, 5, 3, 4)
+#' set.seed(1)
+#' mcmc <- data.frame(
+#'   Group = rep(c("A", "B"), each = 50),
+#'   beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+#'   sigma2 = rgamma(100, shape = 20, rate = 10),
+#'   age = rnorm(100, 50, 5)
 #' )
-#' gP_mean_vector <- c(A = 0.5, B = 0)
-#' results <- find_optimal_point(data, gP_mean_vector, 95)
-#' }
+#'
+#' pred_dist <- calculate_predicted_distributions(
+#'   mcmc, fixed_effects = "beta", random_params = "sigma2",
+#'   by = "Group", tolerance_level = 90
+#' )
+#' gP_mean <- calculate_gP_mean(pred_dist, 90)
+#' optimal <- find_optimal_point(pred_dist, gP_mean, gamma_actual = 80)
+#' optimal[["A"]]
 #'
 #' @export
 find_optimal_point <- function(scatter_data, gP_mean_vector, gamma_actual, max_iterations = 300, tolerance = 0.01) {

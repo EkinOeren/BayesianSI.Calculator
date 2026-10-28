@@ -16,14 +16,15 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' # From a file
-#' data <- load_n_inspect_data("path/to/your/data.csv")
-#'
-#' # From existing data frame
 #' df <- data.frame(x = 1:10, y = letters[1:10])
-#' data <- load_n_inspect_data(data = df)
-#' }
+#' data <- load_n_inspect_data(data = df, silent = TRUE)
+#'
+#' # From a file
+#' path <- tempfile(fileext = ".csv")
+#' utils::write.csv(df, path, row.names = FALSE)
+#' data <- load_n_inspect_data(file_path = path, silent = TRUE)
+#' unlink(path)
+#'
 load_n_inspect_data <- function(file_path = NULL, data = NULL, silent = FALSE) {
   # Input validation
   if (is.null(file_path) && is.null(data)) {

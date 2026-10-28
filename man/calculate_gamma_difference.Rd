@@ -33,16 +33,16 @@ This function calculates the difference between the target gamma (confidence lev
 and the actual gamma achieved for a given set of points.
 }
 \examples{
-\dontrun{
 data <- data.frame(
-  By = c("A", "A", "A", "A"),
+  By = rep("A", 4),
   lower_quantile = c(-2, -1, -3, -2),
   upper_quantile = c(2, 3, 1, 2)
 )
-gP_mean_A <- 0.5
-result <- calculate_gamma_difference(
-  data, gP_mean_A, c(-2, -1.5, -1), 95
-)
-}
+calculate_gamma_difference(data, gP_mean = 0.5, point_x_vector = c(-2, -1.5, -1),
+                           gamma_actual = 95)
 
+}
+\references{
+Krishnamoorthy K, Mathew T (2009). \emph{Statistical Tolerance Regions: Theory,
+Applications, and Computation}. Wiley, Hoboken, NJ. \doi{10.1002/9780470473900}.
 }

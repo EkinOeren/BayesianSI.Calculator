@@ -39,20 +39,27 @@ Creates an interactive plot showing the Krishnamoorthy method results for two-si
 tolerance intervals, including scatter points, optimal line, and optimal point.
 }
 \examples{
-\dontrun{
-# First calculate predicted distributions and optimal points
-pred_dist <- calculate_predicted_distributions(...)
-gP_mean <- calculate_gP_mean(pred_dist, 90)
-optimal_results <- find_optimal_point(pred_dist, gP_mean, 80)
-
-# Create plot for a specific by value
-plot <- plot_krishnamoorthy(
-  data = pred_dist,
-  by_value = "60",
-  optimal_point = optimal_results[["60"]],
-  tolerance_level = 90,
-  confidence_level = 80
+set.seed(1)
+mcmc <- data.frame(
+  Group = rep(c("A", "B"), each = 50),
+  beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+  sigma2 = rgamma(100, shape = 20, rate = 10),
+  age = rnorm(100, 50, 5)
 )
-}
 
+pred_dist <- calculate_predicted_distributions(
+  mcmc, fixed_effects = "beta", random_params = "sigma2",
+  by = "Group", tolerance_level = 90
+)
+gP_mean <- calculate_gP_mean(pred_dist, 90)
+optimal <- find_optimal_point(pred_dist, gP_mean, gamma_actual = 80)
+p <- plot_krishnamoorthy(
+  data = pred_dist, by_value = "A", optimal_point = optimal[["A"]],
+  tolerance_level = 90, confidence_level = 80
+)
+
+}
+\references{
+Krishnamoorthy K, Mathew T (2009). \emph{Statistical Tolerance Regions: Theory,
+Applications, and Computation}. Wiley, Hoboken, NJ. \doi{10.1002/9780470473900}.
 }

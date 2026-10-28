@@ -14,7 +14,7 @@ plot_intervals(
 \arguments{
 \item{result}{A list output from perform_calculations() containing data and summary}
 
-\item{show_reducible}{Logical, whether to show reducible uncertainty ribbons (default = FALSE)}
+\item{show_reducible}{Logical, whether to show reducible imprecision ribbons (default = FALSE)}
 
 \item{x_axis_title}{Character, custom title for x-axis (optional)}
 
@@ -29,21 +29,19 @@ and Tolerance Intervals (TI) using plotly. The plot matches the style and functi
 of the original Shiny app and includes parameter information.
 }
 \examples{
-\dontrun{
-data <- data.frame(
-  t1 = c(-0.82, -0.75, -0.79),
-  v1 = c(0.91, 0.88, 0.90),
-  By = c(1, 1, 2)
+set.seed(1)
+mcmc <- data.frame(
+  Group = rep(c("A", "B"), each = 50),
+  beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+  sigma2 = rgamma(100, shape = 20, rate = 10),
+  age = rnorm(100, 50, 5)
 )
-calc_result <- perform_calculations(
-  data = data,
-  fixed_effects = "t1",
-  random_params = "v1",
-  by = "By",
-  tolerance_level = 90
+
+res <- perform_calculations(
+  mcmc, fixed_effects = "beta", random_params = "sigma2",
+  by = "Group", tolerance_level = 90
 )
-plot_intervals(calc_result)
-plot_intervals(calc_result, show_summary = TRUE)
-}
+p <- plot_intervals(res)
+p2 <- plot_intervals(res, show_summary = TRUE)
 
 }

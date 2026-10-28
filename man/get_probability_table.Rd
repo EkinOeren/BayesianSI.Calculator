@@ -30,7 +30,7 @@ get_probability_table(
 
 \item{by_value}{Character or numeric, the specific by-value to process. Default is "1".}
 
-\item{x_value}{Character or numeric, single value or range in format "\link{min,max}"}
+\item{x_value}{Character or numeric, single value or range in format "[min,max]"}
 
 \item{tolerance_level}{Numeric, tolerance level percentage (between 0 and 100). Required if data is provided.}
 
@@ -50,4 +50,19 @@ A data frame formatted as a table for display
 \description{
 Creates a table showing probability values and confidence intervals for a given x value or range
 using exactly the same calculations as the Shiny app.
+}
+\examples{
+set.seed(1)
+mcmc <- data.frame(
+  Group = rep(c("A", "B"), each = 50),
+  beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+  sigma2 = rgamma(100, shape = 20, rate = 10),
+  age = rnorm(100, 50, 5)
+)
+
+get_probability_table(
+  data = mcmc, fixed_effects = "beta", random_params = "sigma2",
+  by = "Group", by_value = "A", x_value = "10", tolerance_level = 90
+)
+
 }

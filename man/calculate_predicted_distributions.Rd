@@ -49,33 +49,24 @@ This function calculates predicted distributions based on fixed effects, random 
 and covariates. It computes means, medians, quantiles, and variances for each group in the data.
 }
 \examples{
-\dontrun{
-data <- data.frame(
-  Group = rep(c("A", "B"), each = 5),
-  Fixed1 = c(1:5, 6:10),
-  Random1 = c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0),
-  Covariate1 = c(2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+set.seed(1)
+mcmc <- data.frame(
+  Group = rep(c("A", "B"), each = 50),
+  beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+  sigma2 = rgamma(100, shape = 20, rate = 10),
+  age = rnorm(100, 50, 5)
 )
 
-# Without covariates
-result1 <- calculate_predicted_distributions(
-  data,
-  fixed_effects = "Fixed1",
-  random_params = "Random1",
-  by = "Group",
-  tolerance_level = 95
+pred_dist <- calculate_predicted_distributions(
+  mcmc, fixed_effects = "beta", random_params = "sigma2",
+  by = "Group", tolerance_level = 90
 )
+head(pred_dist)
 
-# With covariates
-result2 <- calculate_predicted_distributions(
-  data,
-  fixed_effects = "Fixed1",
-  random_params = "Random1",
-  by = "Group",
-  tolerance_level = 95,
-  covariate_cols = "Covariate1",
-  covariate_values = 2.5
-)
-}
+# With a covariate scaled by 0.1
+calculate_predicted_distributions(
+  mcmc, fixed_effects = "beta", random_params = "sigma2", by = "Group",
+  tolerance_level = 90, covariate_cols = "age", covariate_values = 0.1
+) |> head()
 
 }

@@ -23,6 +23,21 @@
 #'         If by_value is NULL: A list of dataframes, each containing CDF data for a different by-value.
 #'
 #' @importFrom stats qnorm pnorm quantile approx
+#' @examples
+#' set.seed(1)
+#' mcmc <- data.frame(
+#'   Group = rep(c("A", "B"), each = 50),
+#'   beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+#'   sigma2 = rgamma(100, shape = 20, rate = 10),
+#'   age = rnorm(100, 50, 5)
+#' )
+#'
+#' cdf <- create_CDF(
+#'   data = mcmc, fixed_effects = "beta", random_params = "sigma2",
+#'   by = "Group", tolerance_level = 90, n_points = 20
+#' )
+#' names(cdf)
+#'
 #' @export
 create_CDF <- function(data = NULL, fixed_effects = NULL, random_params = NULL,
                        by = NULL, by_value = NULL, tolerance_level = NULL, n_points = 20,

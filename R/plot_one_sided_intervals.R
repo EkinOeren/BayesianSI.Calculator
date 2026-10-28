@@ -5,7 +5,7 @@
 #'
 #' @param data A data frame containing interval data with columns:
 #'        By, Median, CI_Lower, CI_Upper, PI_Lower, PI_Upper, TI_Lower, TI_Upper
-#' @param show_reducible Logical, whether to show reducible uncertainty ribbons (default = FALSE)
+#' @param show_reducible Logical, whether to show reducible imprecision ribbons (default = FALSE)
 #' @param log_normal Logical, whether values are in log-normal scale (default = FALSE)
 #' @param selected_by_values Optional vector of specific by values to include in the plot
 #'
@@ -16,22 +16,21 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
-#' # First calculate intervals
-#' result <- bayesian_statistical_intervals(
-#'   data = mcmc_samples,
-#'   fixed_effects = "beta0",
-#'   random_params = "sigma2",
-#'   by = "Group"
+#' set.seed(1)
+#' mcmc <- data.frame(
+#'   Group = rep(c("A", "B"), each = 50),
+#'   beta = c(rnorm(50, 10, 0.5), rnorm(50, 12, 0.5)),
+#'   sigma2 = rgamma(100, shape = 20, rate = 10),
+#'   age = rnorm(100, 50, 5)
 #' )
 #'
-#' # Then plot one-sided intervals
-#' plots <- plot_one_sided_intervals(result$data)
-#'
-#' # Display upper and lower plots
+#' res <- bayesian_statistical_intervals(
+#'   mcmc, fixed_effects = "beta", random_params = "sigma2",
+#'   by = "Group", tolerance_interval_level = 90
+#' )
+#' plots <- plot_one_sided_intervals(res$data)
 #' plots$upper
 #' plots$lower
-#' }
 #'
 #' @importFrom plotly plot_ly add_trace add_ribbons layout
 #' @export
@@ -92,7 +91,7 @@ plot_one_sided_intervals <- function(data, show_reducible = FALSE,
     by_val <- as.numeric(data$By[i])
     by_label <- as.character(data$By[i])
 
-    # Add reducible uncertainty ribbons if enabled
+    # Add reducible imprecision ribbons if enabled
     if (show_reducible) {
       ribbon_width <- 0.15
 
