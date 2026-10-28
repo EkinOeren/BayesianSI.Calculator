@@ -1,5 +1,5 @@
 library(testthat)
-library(BayesianStatisticalIntervalsCalculator)  # Replace with the actual name of your package
+library(bayesintervals)
 
 # Load the test data
 data(data_InputFileTester2)  # Assuming this dataset is included in your package

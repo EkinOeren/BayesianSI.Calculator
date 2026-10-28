@@ -1,4 +1,4 @@
-# BayesianStatisticalIntervalsCalculator 2.0.0
+# bayesintervals 2.0.0
 
 First CRAN release.
 
@@ -24,6 +24,7 @@ First CRAN release.
 
 ## Changes
 
+* The package is called `bayesintervals`; during development on GitHub it was called `BayesianStatisticalIntervalsCalculator` (BSI).
 * The package is released under the Apache License 2.0.
 * Dependencies were reduced: `ellipse`, `gridExtra`, `shinythemes` and
   `htmltools` are no longer used (confidence ellipses are computed

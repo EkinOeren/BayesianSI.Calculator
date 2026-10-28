@@ -19,7 +19,7 @@
 
 ### SETUP ###
 library(shiny)
-library(BayesianStatisticalIntervalsCalculator)
+library(bayesintervals)
 library(DT)
 library(bslib)
 library(dplyr)

@@ -1,8 +1,8 @@
-# BayesianStatisticalIntervalsCalculator  (BSI)
+# bayesintervals
 
 ## Overview
 
-BSI is a Bayesian statistical analysis tool designed for rapid calculation and visualization of statistical intervals from MCMC output data. It provides both an R package for programmatic access and a Shiny application for interactive analysis.
+**bayesintervals** (also known as BSI, Bayesian Statistical Intervals) is a Bayesian statistical analysis tool designed for rapid calculation and visualization of statistical intervals from MCMC output data. It provides both an R package for programmatic access and a Shiny application for interactive analysis.
 
 <img width="1833" height="779" alt="image" src="https://github.com/user-attachments/assets/94d58c42-2273-48ce-bf78-0587246ecce3" />
 
@@ -29,7 +29,7 @@ Ekin Ören (ekin.oren.3@gmail.com)
 ## Quick Start
 
 ```r
-library(BayesianStatisticalIntervalsCalculator)
+library(bayesintervals)
 
 # Example MCMC data
 toy_data <- data.frame(
@@ -313,7 +313,7 @@ pp_plot_range <- plot_posterior_predictive(
 Here's a complete analysis workflow demonstrating multiple features:
 
 ```r
-library(BayesianStatisticalIntervalsCalculator)
+library(bayesintervals)
 
 # Step 1: Calculate all intervals with covariates and Krishnamoorthy method
 complete_result <- bayesian_statistical_intervals(
@@ -514,7 +514,7 @@ methods it implements. Until the accompanying paper is published, cite the
 package as:
 
 ```
-Ören E, Schmitz S (2026). BayesianStatisticalIntervalsCalculator: Reducible
+Ören E, Schmitz S (2026). bayesintervals: Reducible
 Imprecision and Bayesian Intervals for Mixed Models. R package version 2.0.0.
 ```
 

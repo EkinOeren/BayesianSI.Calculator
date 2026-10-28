@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(BayesianStatisticalIntervalsCalculator)
+library(bayesintervals)
 
-test_check("BayesianStatisticalIntervalsCalculator")
+test_check("bayesintervals")

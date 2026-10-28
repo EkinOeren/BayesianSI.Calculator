@@ -15,9 +15,9 @@
 #'   start_app_view()
 #' }
 start_app_view <- function(...) {
-  app_dir <- system.file("shiny", package = "BayesianStatisticalIntervalsCalculator")
+  app_dir <- system.file("shiny", package = "bayesintervals")
   if (app_dir == "") {
-    stop("Could not find app directory. Try reinstalling `BayesianStatisticalIntervalsCalculator`.", call. = FALSE)
+    stop("Could not find app directory. Try reinstalling `bayesintervals`.", call. = FALSE)
   }
 
   old_options <- options(shiny.maxRequestSize = 30 * 1024^2)

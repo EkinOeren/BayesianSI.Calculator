@@ -7,7 +7,7 @@
 # lognorm_adjuster(). In the app they are reactive (they read the user's inputs),
 # so they have a different signature from the package functions.
 
-pkg <- "BayesianStatisticalIntervalsCalculator"
+pkg <- "bayesintervals"
 
 app_functions <- function() {
   app_file <- system.file("shiny", "app.R", package = pkg)
