@@ -515,7 +515,7 @@ package as:
 
 ```
 Ören E, Schmitz S (2026). bayesintervals: Reducible
-Imprecision and Bayesian Intervals for Mixed Models. R package version 2.0.0.
+Imprecision and Bayesian Intervals for Mixed Models. R package version 3.0.0.
 ```
 
 Methods:

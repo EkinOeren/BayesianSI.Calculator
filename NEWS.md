@@ -1,4 +1,4 @@
-# bayesintervals 2.0.0
+# bayesintervals 3.0.0
 
 First CRAN release.
 

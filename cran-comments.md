@@ -1,6 +1,6 @@
 ## Submission
 
-This is the first CRAN submission of this package (version 2.0.0). The
+This is the first CRAN submission of this package (version 3.0.0). The
 version number continues the numbering of the public GitHub releases.
 
 ## R CMD check results
