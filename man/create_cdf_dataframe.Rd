@@ -28,7 +28,9 @@ A dataframe containing:
 \describe{
 \item{x}{Numeric vector of x values (transformed if log_normal = TRUE)}
 \item{x_log}{Numeric vector of x values in log space}
-\item{y_mean}{Numeric vector of mean CDF values}
+\item{y_mean}{Numeric vector with the median, over the MCMC draws, of the
+distribution functions at each x value (the column name is kept for
+compatibility)}
 \item{ci_lower}{Numeric vector of lower confidence interval bounds}
 \item{ci_upper}{Numeric vector of upper confidence interval bounds}
 \item{by_value}{Character or numeric, the by-value being processed}
