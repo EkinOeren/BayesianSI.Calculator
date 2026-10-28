@@ -70,14 +70,15 @@
                  "File does not exist")
   })
 
-  test_that("load_n_inspect_data handles optional path gracefully", {
-    # Try to load from specific path (with skip if not available)
-    specific_path <- "Z:/BnP/Project/Clinical/Students/Ekin Oren/Data/MCMC Examples/PK Bioequivalence Book by Patterson/InputFileTester2"
 
-    if (file.exists(specific_path)) {
-      result <- load_n_inspect_data(file_path = specific_path)
-      expect_true(is.data.frame(result))
-    } else {
-      skip("Specific test file not available")
-    }
-  })
+test_that("load_n_inspect_data reads a tab-separated file without an extension", {
+  # self-contained: the file is written to the temporary directory
+  path <- tempfile(pattern = "InputFileTester2")
+  utils::write.table(data_InputFileTester2, path, sep = "\t", row.names = FALSE, quote = FALSE)
+  on.exit(unlink(path), add = TRUE)
+
+  result <- load_n_inspect_data(file_path = path)
+  expect_true(is.data.frame(result))
+  expect_equal(dim(result), dim(data_InputFileTester2))
+  expect_equal(names(result), names(data_InputFileTester2))
+})

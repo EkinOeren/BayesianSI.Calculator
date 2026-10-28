@@ -530,7 +530,7 @@ Methods:
 
 ## License
 
-This package is licensed under the [Apache License, Version 2.0](LICENSE.md). Copyright holder: Sanofi. See the [NOTICE](NOTICE) file for attribution details.
+This package is licensed under the [Apache License, Version 2.0](https://github.com/Sanofi-Public/BayesianSI.Calculator/blob/master/LICENSE.md). Copyright holder: Sanofi. See the [NOTICE](https://github.com/Sanofi-Public/BayesianSI.Calculator/blob/master/inst/NOTICE) file for attribution details.
 
 ## Contact
 
