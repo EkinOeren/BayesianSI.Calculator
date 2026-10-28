@@ -2,7 +2,7 @@
 
 ## Overview
 
-**bayesintervals** (also known as BSI, Bayesian Statistical Intervals) is a Bayesian statistical analysis tool designed for rapid calculation and visualization of statistical intervals from MCMC output data. It provides both an R package for programmatic access and a Shiny application for interactive analysis.
+**bayesintervals** is an R package for the rapid calculation and visualization of Bayesian statistical intervals from MCMC output data. It provides both R functions for programmatic access and a Shiny application for interactive analysis. Note that the package and the application have different names: the package is called `bayesintervals`, the application is called **BSI** (Bayesian Statistical Intervals) and is started with `start_app_view()`.
 
 <img width="1833" height="779" alt="image" src="https://github.com/user-attachments/assets/94d58c42-2273-48ce-bf78-0587246ecce3" />
 

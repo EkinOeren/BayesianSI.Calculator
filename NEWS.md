@@ -18,7 +18,7 @@ First CRAN release.
 * `create_CDF()`, `plot_posterior_predictive()` and `get_probability_table()`
   provide posterior predictive distributions and probabilities for a single
   value or a range of values.
-* `start_app_view()` launches an interactive Shiny application.
+* `start_app_view()` launches the interactive Shiny application, which is called BSI (Bayesian Statistical Intervals), a different name from the package.
 * The synthetic data set `data_InputFileTester2` is included for examples and
   tests.
 
