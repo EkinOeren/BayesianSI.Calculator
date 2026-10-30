@@ -147,9 +147,9 @@ It is the part of the tolerance interval that a larger data set could remove. Th
 
 *New in version 3.0.* Click the "Two-Sided Tolerance Intervals" button. A two-sided tolerance interval has a lower and an upper limit, and the two limits are correlated across the MCMC draws, so the result is a two-dimensional region.
 
--   The first plot shows, for the groups you tick, the draws of the lower and the upper tolerance limit together with a confidence ellipse.
+-   The first plot shows, for the groups you tick, the draws of the upper tolerance limit (horizontal axis) and the lower tolerance limit (vertical axis) together with a confidence ellipse.
 
--   The second plot shows how one ordinary interval is derived from this region with the method of Krishnamoorthy and Mathew (2009): the orange line marks the points that are symmetric around the mean midpoint, and its optimal point is chosen such that the chosen credibility level of the draws lies in the shaded quadrant. Choose the group with the radio buttons.
+-   The second plot, with the same axes, shows how one ordinary interval is derived from this region with the method of Krishnamoorthy and Mathew (2009): the orange line marks the points that are symmetric around the mean midpoint, and its optimal point (diamond) is chosen such that the chosen credibility level of the draws lies in the shaded upper-left rectangle, that is, such that this share of the draws has an upper limit below and a lower limit above the optimal point. Choose the group with the radio buttons.
 
 -   The table at the bottom lists the resulting two-sided limits.
 
@@ -303,7 +303,7 @@ knitr::kable(head(log_result$data[, c("By", "Median", "CI_Lower", "CI_Upper", "P
 
 ### Two-Sided Tolerance Intervals (Krishnamoorthy Method)
 
-The construction is available step by step. `calculate_gP_mean(scatter_data, P)` returns, per group, the mean of the midpoints of the lower and upper quantile. `find_optimal_point(scatter_data, gP_mean_vector, gamma_actual)` searches along the line $g_2 = 2\bar g_P - g_1$ for the point at which the share of draws in the quadrant equals `gamma_actual` (it uses `calculate_gamma_difference()` for the share). `add_krishnamoorthy_ti()` adds the resulting limits to a results table (columns `K_TI_Lower` and `K_TI_Upper`).
+The construction is available step by step. `calculate_gP_mean(scatter_data, P)` returns, per group, the mean of the midpoints of the lower and upper quantile. `find_optimal_point(scatter_data, gP_mean_vector, gamma_actual)` searches along the line $g_2 = 2\bar g_P - g_1$ for the point at which the share of draws whose own interval lies inside the candidate interval equals `gamma_actual` (it uses `calculate_gamma_difference()` for the share). `add_krishnamoorthy_ti()` adds the resulting limits to a results table (columns `K_TI_Lower` and `K_TI_Upper`).
 
 ```{r}
 gp  <- calculate_gP_mean(pd, P = 90)
@@ -1264,7 +1264,7 @@ lognorm_adjuster <- function() {
 
 -   \[calculate_gP_mean\]: Returns for every group the mean of the midpoints $(L_m + U_m)/2$ of the lower and upper quantile of the draws. The symmetric interval is built around this value.
 
--   \[calculate_gamma_difference\]: For points on the line $g_2 = 2\bar g_P - g_1$, calculates the share of draws with lower quantile $\le g_1$ and upper quantile $\ge g_2$ and its difference to the target credibility.
+-   \[calculate_gamma_difference\]: For points on the line $g_2 = 2\bar g_P - g_1$, calculates the share of draws whose own interval lies inside the candidate interval, that is with lower quantile $\ge g_1$ and upper quantile $\le g_2$, and its difference to the target credibility.
 
 -   \[find_optimal_point\]: Searches the line for the point at which the share equals the credibility level of the tolerance interval, separately for every By value.
 
@@ -1335,8 +1335,8 @@ calculate_gamma_difference <- function(scatter_data, gP_mean, point_x_vector, ga
   total_points <- nrow(scatter_data)
 
   # Create a matrix of conditions
-  conditions <- outer(scatter_data$upper_quantile, point_y_vector, ">=") &
-    outer(scatter_data$lower_quantile, point_x_vector, "<=")
+  conditions <- outer(scatter_data$upper_quantile, point_y_vector, "<=") &
+    outer(scatter_data$lower_quantile, point_x_vector, ">=")
 
   # Sum the conditions for each point_x
   points_satisfying <- colSums(conditions)
@@ -1431,7 +1431,7 @@ find_optimal_point <- function(scatter_data, gP_mean_vector, gamma_actual, max_i
       g1 = optimal_x,
       g2 = optimal_y,
       gamma_difference = gamma_result$gamma_difference,
-      gamma_achieved = 100 - gamma_result$gamma_difference,
+      gamma_achieved = gamma_actual - gamma_result$gamma_difference,
       points_satisfying = gamma_result$points_satisfying,
       total_points = gamma_result$total_points,
       iterations = iteration

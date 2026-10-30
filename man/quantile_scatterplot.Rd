@@ -58,8 +58,8 @@ It uses plotly for interactivity and can work with either raw data or pre-calcul
 The function creates a scatterplot where:
 \itemize{
 \item Each point represents a single MCMC sample
-\item X-axis shows the lower quantile
-\item Y-axis shows the upper quantile
+\item X-axis shows the upper quantile
+\item Y-axis shows the lower quantile
 \item Points are grouped by the specified 'by' variable
 \item Confidence ellipses show the concentration of points
 \item Diamond markers show the mean position for each group

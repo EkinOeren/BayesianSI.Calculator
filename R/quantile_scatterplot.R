@@ -24,8 +24,8 @@
 #' @details
 #' The function creates a scatterplot where:
 #' - Each point represents a single MCMC sample
-#' - X-axis shows the lower quantile
-#' - Y-axis shows the upper quantile
+#' - X-axis shows the upper quantile
+#' - Y-axis shows the lower quantile
 #' - Points are grouped by the specified 'by' variable
 #' - Confidence ellipses show the concentration of points
 #' - Diamond markers show the mean position for each group
@@ -143,8 +143,8 @@ quantile_scatterplot <- function(data = NULL,
     # Add scatter points
     p <- plotly::add_trace(p,
                            data = group_data,
-                           x = ~lower_quantile,
-                           y = ~upper_quantile,
+                           x = ~upper_quantile,
+                           y = ~lower_quantile,
                            type = 'scatter',
                            mode = 'markers',
                            name = paste("By:", by_value),
@@ -182,8 +182,8 @@ quantile_scatterplot <- function(data = NULL,
 
         # Add ellipse
         p <- plotly::add_trace(p,
-                               x = ellipse_points[, "x"],
-                               y = ellipse_points[, "y"],
+                               x = ellipse_points[, "y"],
+                               y = ellipse_points[, "x"],
                                type = 'scatter',
                                mode = 'lines',
                                name = paste(ellipse_confidence, "% Ellipse"),
@@ -202,8 +202,8 @@ quantile_scatterplot <- function(data = NULL,
 
     # Add mean point
     p <- plotly::add_trace(p,
-                           x = mean_point[1],
-                           y = mean_point[2],
+                           x = mean_point[2],
+                           y = mean_point[1],
                            type = 'scatter',
                            mode = 'markers',
                            name = "Mean",
@@ -227,11 +227,11 @@ quantile_scatterplot <- function(data = NULL,
                       title = sprintf("Tolerance Interval Quantile Scatterplot (%.1f%% Probability Level, %.1f%% Credible Level)",
                                       tolerance_level, ellipse_confidence),
                       xaxis = list(
-                        title = sprintf("Lower Tolerance Interval Probability Level (%.1f%%)", lower_percentile),
+                        title = sprintf("Upper Tolerance Interval Probability Level (%.1f%%)", upper_percentile),
                         zeroline = TRUE
                       ),
                       yaxis = list(
-                        title = sprintf("Upper Tolerance Interval Probability Level (%.1f%%)", upper_percentile),
+                        title = sprintf("Lower Tolerance Interval Probability Level (%.1f%%)", lower_percentile),
                         zeroline = TRUE
                       ),
                       hovermode = 'closest',

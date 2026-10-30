@@ -72,7 +72,7 @@ find_optimal_point <- function(scatter_data, gP_mean_vector, gamma_actual, max_i
       g1 = optimal_x,
       g2 = optimal_y,
       gamma_difference = gamma_result$gamma_difference,
-      gamma_achieved = 100 - gamma_result$gamma_difference,
+      gamma_achieved = gamma_actual - gamma_result$gamma_difference,
       points_satisfying = gamma_result$points_satisfying,
       total_points = gamma_result$total_points,
       iterations = iteration

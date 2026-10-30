@@ -82,8 +82,8 @@ plot_krishnamoorthy <- function(data, by_value, optimal_point,
   # Add scatter points
   p <- add_trace(p,
                  data = data_subset,
-                 x = if(log_normal) ~exp(lower_quantile) else ~lower_quantile,
-                 y = if(log_normal) ~exp(upper_quantile) else ~upper_quantile,
+                 x = if(log_normal) ~exp(upper_quantile) else ~upper_quantile,
+                 y = if(log_normal) ~exp(lower_quantile) else ~lower_quantile,
                  type = 'scatter',
                  mode = 'markers',
                  name = paste("By:", by_value),
@@ -101,9 +101,9 @@ plot_krishnamoorthy <- function(data, by_value, optimal_point,
   )
 
   # Calculate line points
-  x_range <- range(data_subset$lower_quantile)
-  y_range <- range(data_subset$upper_quantile)
-  x_line_log <- seq(min(x_range[1], g1_log), max(x_range[2], g1_log * 1.5), length.out = 100)
+  x_range <- range(data_subset$upper_quantile)
+  y_range <- range(data_subset$lower_quantile)
+  x_line_log <- seq(min(x_range[1], g2_log), max(x_range[2], g2_log * 1.5), length.out = 100)
 
   if(log_normal) {
     x_line_display <- exp(x_line_log)
@@ -131,8 +131,8 @@ plot_krishnamoorthy <- function(data, by_value, optimal_point,
 
   # Add optimal point
   p <- add_trace(p,
-                 x = g1_display,
-                 y = g2_display,
+                 x = g2_display,
+                 y = g1_display,
                  type = 'scatter',
                  mode = 'markers',
                  name = 'Optimal Point',
@@ -162,13 +162,13 @@ plot_krishnamoorthy <- function(data, by_value, optimal_point,
               title = sprintf("Two-Sided Tolerance Intervals (%.1f%% Probability Level, %.1f%% Credible Level)",
                               tolerance_level, confidence_level),
               xaxis = list(
-                title = sprintf("Lower Tolerance Interval Probability Level (%.1f%%)%s",
-                                lower_percentile, if(log_normal) " [Exponentiated]" else ""),
+                title = sprintf("Upper Tolerance Interval Probability Level (%.1f%%)%s",
+                                upper_percentile, if(log_normal) " [Exponentiated]" else ""),
                 zeroline = TRUE
               ),
               yaxis = list(
-                title = sprintf("Upper Tolerance Interval Probability Level (%.1f%%)%s",
-                                upper_percentile, if(log_normal) " [Exponentiated]" else ""),
+                title = sprintf("Lower Tolerance Interval Probability Level (%.1f%%)%s",
+                                lower_percentile, if(log_normal) " [Exponentiated]" else ""),
                 zeroline = TRUE
               ),
               hovermode = 'closest',
@@ -180,11 +180,11 @@ plot_krishnamoorthy <- function(data, by_value, optimal_point,
                 y = -0.2
               ),
               shapes = list(
-                # Vertical line at g1_display
+                # Vertical line at g2_display
                 list(
                   type = "line",
-                  x0 = g1_display,
-                  x1 = g1_display,
+                  x0 = g2_display,
+                  x1 = g2_display,
                   y0 = y_min_display - y_padding,
                   y1 = y_max_display + y_padding,
                   line = list(
@@ -193,13 +193,13 @@ plot_krishnamoorthy <- function(data, by_value, optimal_point,
                     dash = 'dash'
                   )
                 ),
-                # Horizontal line at g2_display
+                # Horizontal line at g1_display
                 list(
                   type = "line",
                   x0 = x_min_display - x_padding,
                   x1 = x_max_display + x_padding,
-                  y0 = g2_display,
-                  y1 = g2_display,
+                  y0 = g1_display,
+                  y1 = g1_display,
                   line = list(
                     color = '#006400',
                     width = 2,
@@ -210,8 +210,8 @@ plot_krishnamoorthy <- function(data, by_value, optimal_point,
                 list(
                   type = "rect",
                   x0 = x_min_display - x_padding,
-                  x1 = g1_display,
-                  y0 = g2_display,
+                  x1 = g2_display,
+                  y0 = g1_display,
                   y1 = y_max_display + y_padding,
                   fillcolor = "rgba(0, 100, 0, 0.1)",
                   line = list(width = 0)

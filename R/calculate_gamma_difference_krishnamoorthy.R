@@ -2,7 +2,10 @@
 #' Calculate Gamma Difference for Krishnamoorthy Method
 #'
 #' This function calculates the difference between the target gamma (confidence level)
-#' and the actual gamma achieved for a given set of points.
+#' and the actual gamma achieved for a given set of points. For a candidate
+#' interval (g1, g2) = (x, 2 * gP_mean - x), the achieved gamma is the percentage of
+#' draws whose own interval lies inside it, that is with `lower_quantile >= g1` and
+#' `upper_quantile <= g2`.
 #'
 #' @param scatter_data A data frame containing at least the following columns:
 #' \itemize{
@@ -41,8 +44,8 @@ calculate_gamma_difference <- function(scatter_data, gP_mean, point_x_vector, ga
   total_points <- nrow(scatter_data)
 
   # Create a matrix of conditions
-  conditions <- outer(scatter_data$upper_quantile, point_y_vector, ">=") &
-    outer(scatter_data$lower_quantile, point_x_vector, "<=")
+  conditions <- outer(scatter_data$upper_quantile, point_y_vector, "<=") &
+    outer(scatter_data$lower_quantile, point_x_vector, ">=")
 
   # Sum the conditions for each point_x
   points_satisfying <- colSums(conditions)

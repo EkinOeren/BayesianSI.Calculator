@@ -2190,8 +2190,8 @@ server <- function(input, output, session) {
     total_points <- nrow(scatter_data)
 
     # Create a matrix of conditions
-    conditions <- outer(scatter_data$upper_quantile, point_y_vector, ">=") &
-      outer(scatter_data$lower_quantile, point_x_vector, "<=")
+    conditions <- outer(scatter_data$upper_quantile, point_y_vector, "<=") &
+      outer(scatter_data$lower_quantile, point_x_vector, ">=")
 
     # Sum the conditions for each point_x
     points_satisfying <- colSums(conditions)
@@ -2281,7 +2281,7 @@ server <- function(input, output, session) {
       # Print final results for this By value
       cat("\nFinal Results for By =", by_val, ":\n")
       cat("Optimal point: (", sprintf("%.6f", optimal_x), ",", sprintf("%.6f", optimal_y), ")\n")
-      cat("Final gamma achieved:", sprintf("%.2f", 100 - gamma_result$gamma_difference), "%\n")
+      cat("Final gamma achieved:", sprintf("%.2f", gamma_actual - gamma_result$gamma_difference), "%\n")
       cat("Points satisfying:", gamma_result$points_satisfying, "out of",
           gamma_result$total_points, "\n")
       cat("Number of iterations:", iteration, "\n")
@@ -2292,7 +2292,7 @@ server <- function(input, output, session) {
         g1 = optimal_x,
         g2 = optimal_y,
         gamma_difference = gamma_result$gamma_difference,
-        gamma_achieved = 100 - gamma_result$gamma_difference,
+        gamma_achieved = gamma_actual - gamma_result$gamma_difference,
         points_satisfying = gamma_result$points_satisfying,
         total_points = gamma_result$total_points,
         iterations = iteration
@@ -3839,8 +3839,8 @@ server <- function(input, output, session) {
           # Add scatter points (conditionally exponentiated)
           p <- add_trace(p,
                          data = e_data$subset,
-                         x = if(is_log_normal) ~exp(lower_quantile) else ~lower_quantile,
-                         y = if(is_log_normal) ~exp(upper_quantile) else ~upper_quantile,
+                         x = if(is_log_normal) ~exp(upper_quantile) else ~upper_quantile,
+                         y = if(is_log_normal) ~exp(lower_quantile) else ~lower_quantile,
                          type = 'scatter',
                          mode = 'markers',
                          name = trace_name,
@@ -3860,8 +3860,8 @@ server <- function(input, output, session) {
 
           # Add mean point (conditionally exponentiated)
           p <- add_trace(p,
-                         x = if(is_log_normal) exp(e_data$mean[1]) else e_data$mean[1],
-                         y = if(is_log_normal) exp(e_data$mean[2]) else e_data$mean[2],
+                         x = if(is_log_normal) exp(e_data$mean[2]) else e_data$mean[2],
+                         y = if(is_log_normal) exp(e_data$mean[1]) else e_data$mean[1],
                          type = 'scatter',
                          mode = 'markers',
                          name = paste(trace_name, "Mean"),
@@ -3900,8 +3900,8 @@ server <- function(input, output, session) {
           darker_color <- colorRampPalette(c(base_color, "black"))(3)[2] # Mix with black for darker shade
 
           p <- add_trace(p,
-                         x = if(is_log_normal) exp(e_data$points[, "x"]) else e_data$points[, "x"],
-                         y = if(is_log_normal) exp(e_data$points[, "y"]) else e_data$points[, "y"],
+                         x = if(is_log_normal) exp(e_data$points[, "y"]) else e_data$points[, "y"],
+                         y = if(is_log_normal) exp(e_data$points[, "x"]) else e_data$points[, "x"],
                          type = 'scatter',
                          mode = 'lines',
                          name = paste(trace_name, "Ellipse"),
@@ -3921,11 +3921,11 @@ server <- function(input, output, session) {
         title = sprintf("Two-Sided Tolerance Intervals (%.1f%% Probability Level, %.1f%% Confidence Level)",
                         tolerance_level, input$confidence_of_tolerance),
         xaxis = list(
-          title = sprintf("Lower Tolerance Interval Probability Level (%.1f%%)", lower_percentile),
+          title = sprintf("Upper Tolerance Interval Probability Level (%.1f%%)", upper_percentile),
           zeroline = TRUE
         ),
         yaxis = list(
-          title = sprintf("Upper Tolerance Interval Probability Level (%.1f%%)", upper_percentile),
+          title = sprintf("Lower Tolerance Interval Probability Level (%.1f%%)", lower_percentile),
           zeroline = TRUE
         ),
         hovermode = 'closest',
@@ -3988,8 +3988,8 @@ server <- function(input, output, session) {
       # Add scatter points
       p <- add_trace(p,
                      data = data_subset,
-                     x = if(is_log_normal) ~exp(lower_quantile) else ~lower_quantile,
-                     y = if(is_log_normal) ~exp(upper_quantile) else ~upper_quantile,
+                     x = if(is_log_normal) ~exp(upper_quantile) else ~upper_quantile,
+                     y = if(is_log_normal) ~exp(lower_quantile) else ~lower_quantile,
                      type = 'scatter',
                      mode = 'markers',
                      name = trace_name,
@@ -4019,10 +4019,10 @@ server <- function(input, output, session) {
         g2_display <- if(is_log_normal) exp(g2_log) else g2_log
 
         # Calculate the line
-        x_range <- range(data_subset$lower_quantile)
-        y_range <- range(data_subset$upper_quantile)
+        x_range <- range(data_subset$upper_quantile)
+        y_range <- range(data_subset$lower_quantile)
 
-        x_line_log <- seq(min(x_range[1], g1_log), max(x_range[2], g1_log * 1.5), length.out = 100)
+        x_line_log <- seq(min(x_range[1], g2_log), max(x_range[2], g2_log * 1.5), length.out = 100)
 
         if(is_log_normal) {
           # For log-normal case: y_new = exp(a*log(x_new)+b) where a=-1 and b=2*gP_mean
@@ -4052,8 +4052,8 @@ server <- function(input, output, session) {
 
         # Add optimal point
         p <- add_trace(p,
-                       x = g1_display,
-                       y = g2_display,
+                       x = g2_display,
+                       y = g1_display,
                        type = 'scatter',
                        mode = 'markers',
                        name = 'Optimal Point',
@@ -4084,13 +4084,13 @@ server <- function(input, output, session) {
           title = sprintf("Two-Sided Tolerance Intervals (%.1f%% Probability Level, %.1f%% Confidence Level)",
                           tolerance_level, input$confidence_of_tolerance),
           xaxis = list(
-            title = sprintf("Lower Tolerance Interval Probability Level (%.1f%%)%s",
-                            lower_percentile, if(is_log_normal) " [Exponentiated]" else ""),
+            title = sprintf("Upper Tolerance Interval Probability Level (%.1f%%)%s",
+                            upper_percentile, if(is_log_normal) " [Exponentiated]" else ""),
             zeroline = TRUE
           ),
           yaxis = list(
-            title = sprintf("Upper Tolerance Interval Probability Level (%.1f%%)%s",
-                            upper_percentile, if(is_log_normal) " [Exponentiated]" else ""),
+            title = sprintf("Lower Tolerance Interval Probability Level (%.1f%%)%s",
+                            lower_percentile, if(is_log_normal) " [Exponentiated]" else ""),
             zeroline = TRUE
           ),
           hovermode = 'closest',
@@ -4102,11 +4102,11 @@ server <- function(input, output, session) {
             y = -0.2
           ),
           shapes = list(
-            # Vertical line at g1_display
+            # Vertical line at g2_display
             list(
               type = "line",
-              x0 = g1_display,
-              x1 = g1_display,
+              x0 = g2_display,
+              x1 = g2_display,
               y0 = y_min_display - y_padding,
               y1 = y_max_display + y_padding,
               line = list(
@@ -4115,13 +4115,13 @@ server <- function(input, output, session) {
                 dash = 'dash'
               )
             ),
-            # Horizontal line at g2_display
+            # Horizontal line at g1_display
             list(
               type = "line",
               x0 = x_min_display - x_padding,
               x1 = x_max_display + x_padding,
-              y0 = g2_display,
-              y1 = g2_display,
+              y0 = g1_display,
+              y1 = g1_display,
               line = list(
                 color = '#006400',
                 width = 2,
@@ -4132,8 +4132,8 @@ server <- function(input, output, session) {
             list(
               type = "rect",
               x0 = x_min_display - x_padding,
-              x1 = g1_display,
-              y0 = g2_display,
+              x1 = g2_display,
+              y0 = g1_display,
               y1 = y_max_display + y_padding,
               fillcolor = "rgba(0, 100, 0, 0.1)",
               line = list(width = 0)
@@ -4149,13 +4149,13 @@ server <- function(input, output, session) {
         title = sprintf("Two-Sided Tolerance Intervals (%.1f%% Probability Level, %.1f%% Confidence Level)",
                         tolerance_level, input$confidence_of_tolerance),
         xaxis = list(
-          title = sprintf("Lower Tolerance Interval Probability Level (%.1f%%)%s",
-                          lower_percentile, if(is_log_normal) " [Exponentiated]" else ""),
+          title = sprintf("Upper Tolerance Interval Probability Level (%.1f%%)%s",
+                          upper_percentile, if(is_log_normal) " [Exponentiated]" else ""),
           zeroline = TRUE
         ),
         yaxis = list(
-          title = sprintf("Upper Tolerance Interval Probability Level (%.1f%%)%s",
-                          upper_percentile, if(is_log_normal) " [Exponentiated]" else ""),
+          title = sprintf("Lower Tolerance Interval Probability Level (%.1f%%)%s",
+                          lower_percentile, if(is_log_normal) " [Exponentiated]" else ""),
           zeroline = TRUE
         ),
         hovermode = 'closest',

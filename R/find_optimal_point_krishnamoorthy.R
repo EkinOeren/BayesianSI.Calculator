@@ -133,7 +133,7 @@ find_optimal_point <- function(scatter_data, gP_mean_vector, gamma_actual, max_i
     if (getOption("verbose", FALSE)) {
       cat("\nFinal Results for By =", by_val, ":\n")
       cat("Optimal point: (", sprintf("%.6f", optimal_x), ",", sprintf("%.6f", optimal_y), ")\n")
-      cat("Final gamma achieved:", sprintf("%.2f", 100 - gamma_result$gamma_difference), "%\n")
+      cat("Final gamma achieved:", sprintf("%.2f", gamma_actual - gamma_result$gamma_difference), "%\n")
       cat("Points satisfying:", gamma_result$points_satisfying, "out of",
           gamma_result$total_points, "\n")
       cat("Number of iterations:", iteration, "\n")
@@ -145,7 +145,7 @@ find_optimal_point <- function(scatter_data, gP_mean_vector, gamma_actual, max_i
       g1 = optimal_x,
       g2 = optimal_y,
       gamma_difference = gamma_result$gamma_difference,
-      gamma_achieved = 100 - gamma_result$gamma_difference,
+      gamma_achieved = gamma_actual - gamma_result$gamma_difference,
       points_satisfying = gamma_result$points_satisfying,
       total_points = gamma_result$total_points,
       iterations = iteration

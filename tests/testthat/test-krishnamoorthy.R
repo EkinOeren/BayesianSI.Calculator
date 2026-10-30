@@ -181,35 +181,30 @@ test_that("Krishnamoorthy method functions work correctly", {
   expect_equal(nrow(updated_data), nrow(intervals_data))
 
   # ============================================================================
-  # STEP 6: Verify expected Krishnamoorthy TI values
+  # STEP 6: Verify the Krishnamoorthy TI values
   # ============================================================================
 
-  cat("\n=== Verifying Expected Krishnamoorthy TI Values ===\n")
-
-  # Expected values with allowance
-  expected_lower_ti <- -14.8654
-  expected_upper_ti <- 14.9449
-  allowance <- 0.0009
-
-  # Get actual values
   actual_lower_ti <- updated_data$K_TI_Lower
   actual_upper_ti <- updated_data$K_TI_Upper
 
-  # Print comparison
-  cat("Expected Lower TI:", expected_lower_ti, "\n")
-  cat("Actual Lower TI:", actual_lower_ti, "\n")
-  cat("Difference:", abs(expected_lower_ti - actual_lower_ti), "\n\n")
+  # (a) The point lies on the line g1 + g2 = 2 * gP_mean
+  expect_equal((actual_lower_ti + actual_upper_ti) / 2, unname(gP_mean_60), tolerance = 1e-6)
 
-  cat("Expected Upper TI:", expected_upper_ti, "\n")
-  cat("Actual Upper TI:", actual_upper_ti, "\n")
-  cat("Difference:", abs(expected_upper_ti - actual_upper_ti), "\n")
+  # (b) Independent check by brute force: the share of draws whose own interval
+  #     [lower_quantile, upper_quantile] lies inside [g1, g2] must equal the target
+  #     credibility, and the optimal g1 must lie in the range of g1 values that give
+  #     exactly that share (with 10 draws the share moves in steps of 10 percentage points).
+  share_inside <- function(g1) mean(pred_dist$lower_quantile >= g1 &
+                                    pred_dist$upper_quantile <= 2 * gP_mean_60 - g1)
+  expect_equal(share_inside(actual_lower_ti), confidence_level / 100)
+  grid <- seq(-40, 0, by = 0.001)
+  plateau <- grid[vapply(grid, share_inside, numeric(1)) == confidence_level / 100]
+  expect_true(actual_lower_ti >= min(plateau) - 1e-3 && actual_lower_ti <= max(plateau) + 1e-3)
 
-  # Test with allowance
-  expect_true(abs(actual_lower_ti - expected_lower_ti) <= allowance,
-              info = paste("Lower TI difference:", abs(actual_lower_ti - expected_lower_ti)))
+  # (c) Regression values (bisection result for this toy data set)
+  expect_equal(actual_lower_ti, -22.0166, tolerance = 1e-3)
+  expect_equal(actual_upper_ti, 22.0961, tolerance = 1e-3)
 
-  expect_true(abs(actual_upper_ti - expected_upper_ti) <= allowance,
-              info = paste("Upper TI difference:", abs(actual_upper_ti - expected_upper_ti)))
 
   cat("\n=== All Krishnamoorthy Tests Passed! ===\n")
 })

@@ -32,7 +32,13 @@ start_app <- function() {
   p
 }
 open_page <- function(width = 1500, height = 1750) {
-  b <- ChromoteSession$new(width = width, height = height)
+  # Optional: connect to a browser that is already running with --remote-debugging-port=<CHROMOTE_REMOTE_PORT>
+  # (useful when chromote cannot start the browser itself).
+  rp <- Sys.getenv("CHROMOTE_REMOTE_PORT")
+  b <- if (nzchar(rp)) {
+    ChromoteSession$new(parent = Chromote$new(browser = ChromeRemote$new(host = "127.0.0.1", port = as.integer(rp))),
+                        width = width, height = height)
+  } else ChromoteSession$new(width = width, height = height)
   b$Page$navigate(sprintf("http://127.0.0.1:%d", port))
   Sys.sleep(5)
   b

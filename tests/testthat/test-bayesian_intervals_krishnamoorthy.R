@@ -84,29 +84,22 @@ test_that("bayesian_statistical_intervals works with and without Krishnamoorthy 
   expect_equal(result_standard$data$TI_Lower, result_krishnamoorthy$data$TI_Lower)
   expect_equal(result_standard$data$TI_Upper, result_krishnamoorthy$data$TI_Upper)
 
-  # Verify Krishnamoorthy TI values (with allowance)
-  expected_k_ti_lower <- -14.8654
-  expected_k_ti_upper <- 14.9449
-  allowance <- 0.0009
+  # Verify Krishnamoorthy TI values: the interval is centred on the mean midpoint, and
+  # the share of draws whose own interval lies inside it equals the credibility (80%).
+  pd <- calculate_predicted_distributions(
+    toy_data, params$fixed_effects, params$random_params, params$by,
+    params$tolerance_interval_level, params$multiplication_factor,
+    params$covariate_cols, params$covariate_values)
+  k_lower <- result_krishnamoorthy$data$K_TI_Lower
+  k_upper <- result_krishnamoorthy$data$K_TI_Upper
+  expect_equal((k_lower + k_upper) / 2, mean((pd$lower_quantile + pd$upper_quantile) / 2), tolerance = 1e-6)
+  expect_equal(mean(pd$lower_quantile >= k_lower & pd$upper_quantile <= k_upper),
+               params$credibility_of_tolerance_interval / 100)
 
-  expect_true(
-    abs(result_krishnamoorthy$data$K_TI_Lower - expected_k_ti_lower) <= allowance,
-    info = paste("K_TI_Lower difference:",
-                 abs(result_krishnamoorthy$data$K_TI_Lower - expected_k_ti_lower))
-  )
+  # Regression values
+  expect_equal(k_lower, -22.0166, tolerance = 1e-3)
+  expect_equal(k_upper, 22.0961, tolerance = 1e-3)
 
-  expect_true(
-    abs(result_krishnamoorthy$data$K_TI_Upper - expected_k_ti_upper) <= allowance,
-    info = paste("K_TI_Upper difference:",
-                 abs(result_krishnamoorthy$data$K_TI_Upper - expected_k_ti_upper))
-  )
-
-  # Print differences
-  cat("\nDifferences from expected values:\n")
-  cat("K_TI_Lower difference:",
-      abs(result_krishnamoorthy$data$K_TI_Lower - expected_k_ti_lower), "\n")
-  cat("K_TI_Upper difference:",
-      abs(result_krishnamoorthy$data$K_TI_Upper - expected_k_ti_upper), "\n")
 
   cat("\n=== Test Complete ===\n")
 })

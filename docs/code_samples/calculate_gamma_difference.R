@@ -7,8 +7,8 @@ calculate_gamma_difference <- function(scatter_data, gP_mean, point_x_vector, ga
   total_points <- nrow(scatter_data)
 
   # Create a matrix of conditions
-  conditions <- outer(scatter_data$upper_quantile, point_y_vector, ">=") &
-    outer(scatter_data$lower_quantile, point_x_vector, "<=")
+  conditions <- outer(scatter_data$upper_quantile, point_y_vector, "<=") &
+    outer(scatter_data$lower_quantile, point_x_vector, ">=")
 
   # Sum the conditions for each point_x
   points_satisfying <- colSums(conditions)

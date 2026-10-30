@@ -30,7 +30,10 @@ A list containing:
 }
 \description{
 This function calculates the difference between the target gamma (confidence level)
-and the actual gamma achieved for a given set of points.
+and the actual gamma achieved for a given set of points. For a candidate
+interval (g1, g2) = (x, 2 * gP_mean - x), the achieved gamma is the percentage of
+draws whose own interval lies inside it, that is with \code{lower_quantile >= g1} and
+\code{upper_quantile <= g2}.
 }
 \examples{
 data <- data.frame(
